@@ -3,89 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>iMiner Pro Clone</title>
+    <title>iMiner Ultimate</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #6c5ce7; --secondary: #a29bfe; --bg: #050510; --card: #121225; --gold: #fdcb6e; }
-        body { background-color: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px; }
-        
-        /* الهيدر الاحترافي */
-        .user-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); }
-        .user-info { display: flex; align-items: center; gap: 10px; }
-        .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); }
+        :root { --primary: #6c5ce7; --bg: #050510; --card: #121225; --gold: #fdcb6e; --success: #00b894; --text-gray: #b2bec3; }
+        body { background-color: var(--bg); color: white; font-family: 'Cairo', sans-serif; margin: 0; padding-bottom: 90px; user-select: none; }
+        .page { display: none; padding: 20px; animation: slideUp 0.4s ease; }
+        .active-page { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* الأرصدة */
-        .balance-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
-        .b-card { background: var(--card); padding: 15px; border-radius: 15px; border: 1px solid #252545; }
-        .b-card div:first-child { color: var(--secondary); font-size: 12px; }
-        .b-card div:last-child { font-size: 18px; font-weight: bold; margin-top: 5px; }
+        /* الهيدر العلوي */
+        .top-info { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(255,255,255,0.02); border-bottom: 1px solid #1e1e35; }
+        .user-tag { background: var(--card); padding: 5px 12px; border-radius: 10px; font-size: 12px; border: 1px solid #252545; }
 
-        /* الكوكب المركزي */
-        .mining-zone { text-align: center; margin: 20px 0; position: relative; }
-        .planet { width: 220px; height: 220px; background: radial-gradient(circle, #4834d4 0%, #000 70%); border-radius: 50%; margin: 0 auto; box-shadow: 0 0 50px rgba(108, 92, 231, 0.4); animation: rotate 20s linear infinite; display: flex; align-items: center; justify-content: center; font-size: 50px; }
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        /* صفحة التعدين */
+        .main-mining { text-align: center; margin-top: 30px; }
+        .planet-glow { width: 240px; height: 240px; background: radial-gradient(circle, #4834d4 0%, transparent 70%); border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; }
+        .planet-glow img { width: 80%; filter: drop-shadow(0 0 20px var(--primary)); }
+        .mining-counter { font-size: 48px; font-weight: bold; margin: 20px 0; color: white; }
 
-        /* زر الحصد الكبير */
-        .claim-area { background: linear-gradient(to right, #6c5ce7, #a29bfe); margin: 20px; padding: 15px; border-radius: 50px; text-align: center; font-weight: bold; cursor: pointer; box-shadow: 0 10px 20px rgba(108, 92, 231, 0.3); }
+        /* صفحة التسريع/المتجر */
+        .boost-card { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid #252545; display: flex; justify-content: space-between; align-items: center; }
+        .boost-info h4 { margin: 0; color: var(--gold); }
+        .price-tag { background: var(--primary); padding: 8px 15px; border-radius: 12px; font-weight: bold; font-size: 14px; }
+
+        /* المحفظة */
+        .wallet-box { background: linear-gradient(135deg, #1e1e35, #0a0a15); padding: 30px; border-radius: 25px; text-align: center; border: 1px solid #252545; margin-bottom: 25px; }
+        .asset-list { background: var(--card); border-radius: 15px; padding: 5px; }
+        .asset-row { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #1e1e35; }
 
         /* القائمة السفلية */
-        .nav-bar { position: fixed; bottom: 0; width: 100%; display: grid; grid-template-columns: repeat(5, 1fr); background: #0a0a15; padding: 10px 0; border-top: 1px solid #252545; }
-        .nav-item { text-align: center; font-size: 10px; color: #666; cursor: pointer; }
-        .nav-item.active { color: var(--primary); }
+        .nav-bar { position: fixed; bottom: 0; width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); background: #0a0a15; padding: 12px 0; border-top: 1px solid #252545; z-index: 1000; }
+        .nav-item { text-align: center; font-size: 11px; color: var(--text-gray); transition: 0.2s; }
+        .nav-item.active { color: var(--primary); font-weight: bold; transform: translateY(-5px); }
+        .nav-item i { font-size: 22px; display: block; margin-bottom: 4px; }
     </style>
 </head>
 <body>
-    <div class="user-header">
-        <div class="user-info"><div class="avatar"></div><div id="userName">MUGAHED</div></div>
-        <div style="background: #1e1e35; padding: 5px 10px; border-radius: 10px; font-size: 12px;">Lv.0 🏆</div>
+
+    <div class="top-info">
+        <div class="user-tag">🆔 ID: 277163</div>
+        <div class="user-tag" style="color:var(--gold)">🏆 المستوى 0</div>
     </div>
 
-    <div class="balance-cards">
-        <div class="b-card"><div>عملات IMR</div><div id="imrBalance">228.96</div></div>
-        <div class="b-card"><div>رصيد USDT</div><div>0.0258</div></div>
+    <div id="home" class="page active-page">
+        <div class="main-mining">
+            <div class="planet-glow" onclick="tapEffect(event)">
+                <img src="https://cdn-icons-png.flaticon.com/512/2534/2534125.png">
+            </div>
+            <div class="mining-counter" id="mainBal">0.0000</div>
+            <div style="color: var(--success);">⚡ الربح: +0.01/ث</div>
+        </div>
+        <div style="background: var(--primary); padding: 18px; border-radius: 15px; text-align: center; margin-top: 40px; font-weight: bold;" onclick="claim()">حصاد العملات</div>
     </div>
 
-    <div class="mining-zone">
-        <div class="planet">🪐</div>
-        <div style="margin-top: 15px; color: #888;">جاري التعدين تلقائياً...</div>
-        <div id="autoMin" style="font-size: 24px; color: var(--gold); font-weight: bold; margin-top: 5px;">0.0000</div>
+    <div id="boost" class="page">
+        <h3 style="margin-bottom: 20px;">تطوير معدات التعدين 🚀</h3>
+        <div class="boost-card">
+            <div class="boost-info"><h4>المعدن الفضي</h4><small>+2.5 IMR/ساعة</small></div>
+            <div class="price-tag">10 USDT</div>
+        </div>
+        <div class="boost-card">
+            <div class="boost-info"><h4>المعدن الذهبي</h4><small>+10 IMR/ساعة</small></div>
+            <div class="price-tag">28 USDT</div>
+        </div>
     </div>
 
-    <div class="claim-area" onclick="claim()">حصد الأرباح (Claim)</div>
-
-    <div style="padding: 15px;">
-        <div style="margin-bottom: 10px; font-weight: bold;">مركز المهام 🔥</div>
-        <div style="background: var(--card); padding: 15px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--primary);">
-            <div>شارك على تليجرام</div>
-            <div style="background: var(--primary); padding: 5px 15px; border-radius: 20px; font-size: 12px;">+500 IMR</div>
+    <div id="wallet" class="page">
+        <div class="wallet-box">
+            <div style="color: var(--text-gray);">إجمالي الرصيد</div>
+            <div style="font-size: 36px; font-weight: bold; margin: 10px 0;">$22.45</div>
+            <div style="display: flex; justify-content: center; gap: 15px; margin-top: 15px;">
+                <button style="background:var(--success); border:none; color:white; padding:8px 20px; border-radius:10px;">إيداع</button>
+                <button style="background:#444; border:none; color:white; padding:8px 20px; border-radius:10px;">سحب</button>
+            </div>
+        </div>
+        <div class="asset-list">
+            <div class="asset-row"><span>🟡 IMR Token</span><b>228.96</b></div>
+            <div class="asset-row"><span>🟢 USDT</span><b>0.0258</b></div>
         </div>
     </div>
 
     <div class="nav-bar">
-        <div class="nav-item active">🏠<br>الرئيسية</div>
-        <div class="nav-item">👥<br>المجموعة</div>
-        <div class="nav-item">🚀<br>الأرباح</div>
-        <div class="nav-item">⚡<br>تسريع</div>
-        <div class="nav-item">💳<br>المحفظة</div>
+        <div class="nav-item active" onclick="nav('home', this)"><i>🏠</i>الرئيسية</div>
+        <div class="nav-item" onclick="nav('boost', this)"><i>⚡</i>تسريع</div>
+        <div class="nav-item" onclick="nav('wallet', this)"><i>💳</i>المحفظة</div>
+        <div class="nav-item" onclick="tg.showAlert('قريباً')"><i>👥</i>الأصدقاء</div>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
-        let balance = 228.96;
-        let autoValue = 0;
+        let balance = 0;
+
+        function nav(id, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+            document.getElementById(id).classList.add('active-page');
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            tg.HapticFeedback.impactOccurred('medium');
+        }
 
         setInterval(() => {
-            autoValue += 0.0001;
-            document.getElementById('autoMin').innerText = "+" + autoValue.toFixed(4);
+            balance += 0.0001;
+            document.getElementById('mainBal').innerText = balance.toFixed(4);
         }, 1000);
 
         function claim() {
-            balance += autoValue;
-            autoValue = 0;
-            document.getElementById('imrBalance').innerText = balance.toFixed(2);
-            tg.HapticFeedback.notificationOccurred('success');
-            tg.showAlert("تم نقل العملات إلى رصيدك الأساسي!");
+            tg.showConfirm("هل تريد تحويل الرصيد؟", (ok) => {
+                if(ok) { tg.showAlert("تم التحويل بنجاح!"); balance = 0; }
+            });
+        }
+
+        function tapEffect(e) {
+            tg.HapticFeedback.impactOccurred('light');
+            // هنا يمكنك إضافة أنيميشن الأرقام الطائرة إذا أردت مستقبلاً
         }
     </script>
 </body>
