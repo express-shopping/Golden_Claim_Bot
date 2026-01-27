@@ -3,105 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Golden Claim Mining</title>
+    <title>Golden Hamster Clone</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body {
-            background-color: #0a0a0a;
-            color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            overflow: hidden;
-        }
-        .mining-container {
-            background: radial-gradient(circle, #1a1a1a 0%, #000000 100%);
-            width: 90%;
-            max-width: 400px;
-            border-radius: 30px;
-            padding: 40px 20px;
-            border: 2px solid #ffd700;
-            box-shadow: 0 0 30px rgba(255, 214, 0, 0.15);
-            text-align: center;
-        }
-        .coin-icon {
-            font-size: 80px;
-            filter: drop-shadow(0 0 10px #ffd700);
-            margin-bottom: 20px;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-        .balance-label { font-size: 18px; color: #aaa; margin-bottom: 10px; }
-        .balance-value { font-size: 48px; font-weight: bold; color: #ffd700; margin-bottom: 30px; }
-        .stats {
-            display: flex;
-            justify-content: space-around;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-        }
-        .stat-item { font-size: 14px; color: #00ff00; }
-        .claim-button {
-            background: linear-gradient(45deg, #ffd700, #ffa500);
-            border: none;
-            padding: 18px 60px;
-            border-radius: 50px;
-            color: #000;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            transition: 0.3s;
-        }
-        .claim-button:active { transform: scale(0.95); }
+        body { background-color: #000; color: white; font-family: 'Arial', sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; }
+        .header { margin-top: 20px; text-align: center; }
+        .balance-container { font-size: 45px; font-weight: bold; color: #ffd700; display: flex; align-items: center; gap: 10px; }
+        .coin-main { width: 250px; height: 250px; background: radial-gradient(circle, #ffd700 0%, #b8860b 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 100px; cursor: pointer; border: 10px solid #333; box-shadow: 0 0 50px rgba(255, 215, 0, 0.3); transition: transform 0.1s; margin: 40px 0; user-select: none; }
+        .coin-main:active { transform: scale(0.92); }
+        .energy-bar { width: 80%; height: 15px; background: #333; border-radius: 10px; overflow: hidden; margin-top: 20px; }
+        .energy-fill { width: 100%; height: 100%; background: linear-gradient(to right, #ffd700, #ffa500); transition: width 0.3s; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 90%; margin-top: 20px; }
+        .stat-card { background: #1a1a1a; padding: 15px; border-radius: 15px; text-align: center; border: 1px solid #333; }
+        .claim-btn { background: #ffd700; color: black; border: none; padding: 15px 40px; border-radius: 50px; font-weight: bold; font-size: 18px; margin-top: 20px; width: 80%; }
     </style>
 </head>
 <body>
-
-    <div class="mining-container">
-        <div class="coin-icon">🟡</div>
-        <div class="balance-label">رصيد التعدين المتاح</div>
-        <div id="balance" class="balance-value">0.000000</div>
-        
-        <div class="stats">
-            <div class="stat-item">⚡ السرعة: 0.0001/ث</div>
-            <div class="stat-item">🛡️ الحالة: نشط</div>
-        </div>
-
-        <button class="claim-button" onclick="handleClaim()">حصد العملات (Claim)</button>
+    <div class="header">
+        <div class="balance-container">🪙 <span id="balance">0</span></div>
+        <div style="color: #aaa;">الربح لكل نقرة: +1</div>
     </div>
+
+    <div class="coin-main" id="coin" onclick="tapCoin()">🐹</div>
+
+    <div class="energy-bar"><div class="energy-fill" id="energyFill"></div></div>
+    <div style="margin-top: 5px;">⚡ <span id="energyText">1000</span> / 1000</div>
+
+    <div class="stats-grid">
+        <div class="stat-card"><div style="color: #ffd700;">الأصدقاء</div><div id="friends">0</div></div>
+        <div class="stat-card"><div style="color: #ffd700;">المستوى</div><div>مبتدئ</div></div>
+    </div>
+
+    <button class="claim-btn" onclick="inviteFriend()">🔗 دعوة صديق للربح</button>
 
     <script>
         let tg = window.Telegram.WebApp;
-        tg.expand(); // تمديد الواجهة لكامل الشاشة
+        let balance = 0;
+        let energy = 1000;
 
-        let balance = 0.000000;
-        const balanceDisplay = document.getElementById('balance');
-
-        // محاكاة التعدين التلقائي
-        setInterval(() => {
-            balance += 0.000001;
-            balanceDisplay.innerText = balance.toFixed(6);
-        }, 1000);
-
-        function handleClaim() {
-            tg.showConfirm(`هل تريد تحويل ${balance.toFixed(6)} إلى محفظتك؟`, (ok) => {
-                if (ok) {
-                    tg.showAlert("✅ تم التحويل بنجاح! سيظهر الرصيد في البوت قريباً.");
-                    balance = 0;
-                    balanceDisplay.innerText = balance.toFixed(6);
-                }
-            });
+        function tapCoin() {
+            if (energy > 0) {
+                balance += 1;
+                energy -= 2;
+                updateDisplay();
+                tg.HapticFeedback.impactOccurred('medium'); // هزاز عند النقر
+            }
         }
+
+        function updateDisplay() {
+            document.getElementById('balance').innerText = balance;
+            document.getElementById('energyText').innerText = energy;
+            document.getElementById('energyFill').style.width = (energy / 10) + '%';
+        }
+
+        function inviteFriend() {
+            let inviteLink = "https://t.me/Golden_Claim_Bot?start=" + tg.initDataUnsafe.user.id;
+            tg.showPopup({ title: 'رابط الإحالة', message: inviteLink, buttons: [{text: 'نسخ', type: 'ok'}] });
+        }
+
+        // استعادة الطاقة تلقائياً
+        setInterval(() => { if (energy < 1000) { energy += 1; updateDisplay(); } }, 2000);
     </script>
 </body>
 </html>
