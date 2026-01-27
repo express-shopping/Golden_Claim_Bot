@@ -3,123 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>iMiner Ultimate</title>
+    <title>Golden Claim Elite</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #6c5ce7; --bg: #050510; --card: #121225; --gold: #fdcb6e; --success: #00b894; --text-gray: #b2bec3; }
-        body { background-color: var(--bg); color: white; font-family: 'Cairo', sans-serif; margin: 0; padding-bottom: 90px; user-select: none; }
-        .page { display: none; padding: 20px; animation: slideUp 0.4s ease; }
-        .active-page { display: block; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        :root { --primary: #6c5ce7; --bg: #050510; --card: #121225; --gold: #fdcb6e; }
+        body { background-color: var(--bg); color: white; font-family: 'Cairo', sans-serif; margin: 0; overflow: hidden; }
 
-        /* الهيدر العلوي */
-        .top-info { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(255,255,255,0.02); border-bottom: 1px solid #1e1e35; }
-        .user-tag { background: var(--card); padding: 5px 12px; border-radius: 10px; font-size: 12px; border: 1px solid #252545; }
+        /* شاشة الدخول الفخمة */
+        #splash-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, #1a1a35 0%, var(--bg) 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999; transition: 0.5s;
+        }
+        .logo-container {
+            width: 150px; height: 150px; background: var(--card); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            border: 4px solid var(--gold); box-shadow: 0 0 40px rgba(253, 203, 110, 0.3);
+            margin-bottom: 20px; animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        
+        .start-btn {
+            background: linear-gradient(45deg, var(--gold), #f39c12);
+            color: black; border: none; padding: 15px 60px; border-radius: 50px;
+            font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4);
+        }
 
-        /* صفحة التعدين */
-        .main-mining { text-align: center; margin-top: 30px; }
-        .planet-glow { width: 240px; height: 240px; background: radial-gradient(circle, #4834d4 0%, transparent 70%); border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; }
-        .planet-glow img { width: 80%; filter: drop-shadow(0 0 20px var(--primary)); }
-        .mining-counter { font-size: 48px; font-weight: bold; margin: 20px 0; color: white; }
-
-        /* صفحة التسريع/المتجر */
-        .boost-card { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid #252545; display: flex; justify-content: space-between; align-items: center; }
-        .boost-info h4 { margin: 0; color: var(--gold); }
-        .price-tag { background: var(--primary); padding: 8px 15px; border-radius: 12px; font-weight: bold; font-size: 14px; }
-
-        /* المحفظة */
-        .wallet-box { background: linear-gradient(135deg, #1e1e35, #0a0a15); padding: 30px; border-radius: 25px; text-align: center; border: 1px solid #252545; margin-bottom: 25px; }
-        .asset-list { background: var(--card); border-radius: 15px; padding: 5px; }
-        .asset-row { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #1e1e35; }
-
-        /* القائمة السفلية */
-        .nav-bar { position: fixed; bottom: 0; width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); background: #0a0a15; padding: 12px 0; border-top: 1px solid #252545; z-index: 1000; }
-        .nav-item { text-align: center; font-size: 11px; color: var(--text-gray); transition: 0.2s; }
-        .nav-item.active { color: var(--primary); font-weight: bold; transform: translateY(-5px); }
-        .nav-item i { font-size: 22px; display: block; margin-bottom: 4px; }
+        /* القالب الأساسي بعد الدخول */
+        #main-app { display: none; padding: 20px; }
+        .nav-bar { position: fixed; bottom: 0; width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); background: #0a0a15; padding: 12px 0; border-top: 1px solid #252545; }
+        .nav-item { text-align: center; font-size: 11px; color: #888; cursor: pointer; }
+        .nav-item.active { color: var(--gold); }
     </style>
 </head>
 <body>
 
-    <div class="top-info">
-        <div class="user-tag">🆔 ID: 277163</div>
-        <div class="user-tag" style="color:var(--gold)">🏆 المستوى 0</div>
+    <div id="splash-screen">
+        <div class="logo-container">
+            <img src="https://cdn-icons-png.flaticon.com/512/8142/8142131.png" width="100">
+        </div>
+        <h1 style="color: var(--gold); margin-bottom: 10px;">Golden Claim</h1>
+        <p style="color: #ccc; margin-bottom: 40px;">مرحباً بك في عالم التعدين الفاخر</p>
+        <button class="start-btn" onclick="startApp()">ابدأ الآن</button>
     </div>
 
-    <div id="home" class="page active-page">
-        <div class="main-mining">
-            <div class="planet-glow" onclick="tapEffect(event)">
-                <img src="https://cdn-icons-png.flaticon.com/512/2534/2534125.png">
-            </div>
-            <div class="mining-counter" id="mainBal">0.0000</div>
-            <div style="color: var(--success);">⚡ الربح: +0.01/ث</div>
+    <div id="main-app">
+        <div style="text-align: center; margin-top: 50px;">
+            <div style="font-size: 18px; color: var(--gold);">رصيد العملات المجمعة</div>
+            <div id="balance" style="font-size: 50px; font-weight: bold; margin: 20px 0;">0.0000</div>
+            <div style="width: 200px; height: 200px; background: radial-gradient(circle, #6c5ce7 0%, transparent 70%); border-radius: 50%; margin: 0 auto; font-size: 80px; display: flex; align-items: center; justify-content: center;">🪐</div>
         </div>
-        <div style="background: var(--primary); padding: 18px; border-radius: 15px; text-align: center; margin-top: 40px; font-weight: bold;" onclick="claim()">حصاد العملات</div>
-    </div>
-
-    <div id="boost" class="page">
-        <h3 style="margin-bottom: 20px;">تطوير معدات التعدين 🚀</h3>
-        <div class="boost-card">
-            <div class="boost-info"><h4>المعدن الفضي</h4><small>+2.5 IMR/ساعة</small></div>
-            <div class="price-tag">10 USDT</div>
+        
+        <div class="nav-bar">
+            <div class="nav-item active">🏠<br>الرئيسية</div>
+            <div class="nav-item" onclick="tg.showAlert('المحفظة قيد التجهيز')">💳<br>المحفظة</div>
+            <div class="nav-item" onclick="tg.showAlert('المهام قيد التجهيز')">🚀<br>المهام</div>
         </div>
-        <div class="boost-card">
-            <div class="boost-info"><h4>المعدن الذهبي</h4><small>+10 IMR/ساعة</small></div>
-            <div class="price-tag">28 USDT</div>
-        </div>
-    </div>
-
-    <div id="wallet" class="page">
-        <div class="wallet-box">
-            <div style="color: var(--text-gray);">إجمالي الرصيد</div>
-            <div style="font-size: 36px; font-weight: bold; margin: 10px 0;">$22.45</div>
-            <div style="display: flex; justify-content: center; gap: 15px; margin-top: 15px;">
-                <button style="background:var(--success); border:none; color:white; padding:8px 20px; border-radius:10px;">إيداع</button>
-                <button style="background:#444; border:none; color:white; padding:8px 20px; border-radius:10px;">سحب</button>
-            </div>
-        </div>
-        <div class="asset-list">
-            <div class="asset-row"><span>🟡 IMR Token</span><b>228.96</b></div>
-            <div class="asset-row"><span>🟢 USDT</span><b>0.0258</b></div>
-        </div>
-    </div>
-
-    <div class="nav-bar">
-        <div class="nav-item active" onclick="nav('home', this)"><i>🏠</i>الرئيسية</div>
-        <div class="nav-item" onclick="nav('boost', this)"><i>⚡</i>تسريع</div>
-        <div class="nav-item" onclick="nav('wallet', this)"><i>💳</i>المحفظة</div>
-        <div class="nav-item" onclick="tg.showAlert('قريباً')"><i>👥</i>الأصدقاء</div>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
-        let balance = 0;
 
-        function nav(id, el) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
-            document.getElementById(id).classList.add('active-page');
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            el.classList.add('active');
-            tg.HapticFeedback.impactOccurred('medium');
+        // وظيفة بدء التطبيق
+        function startApp() {
+            tg.HapticFeedback.impactOccurred('heavy');
+            document.getElementById('splash-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('splash-screen').style.display = 'none';
+                document.getElementById('main-app').style.display = 'block';
+            }, 500);
         }
 
+        // عداد التعدين التلقائي
+        let bal = 0;
         setInterval(() => {
-            balance += 0.0001;
-            document.getElementById('mainBal').innerText = balance.toFixed(4);
+            if(document.getElementById('main-app').style.display === 'block') {
+                bal += 0.0001;
+                document.getElementById('balance').innerText = bal.toFixed(4);
+            }
         }, 1000);
-
-        function claim() {
-            tg.showConfirm("هل تريد تحويل الرصيد؟", (ok) => {
-                if(ok) { tg.showAlert("تم التحويل بنجاح!"); balance = 0; }
-            });
-        }
-
-        function tapEffect(e) {
-            tg.HapticFeedback.impactOccurred('light');
-            // هنا يمكنك إضافة أنيميشن الأرقام الطائرة إذا أردت مستقبلاً
-        }
     </script>
 </body>
 </html>
+
