@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Golden Claim Mining</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .mining-container {
+            background: radial-gradient(circle, #1a1a1a 0%, #000000 100%);
+            width: 90%;
+            max-width: 400px;
+            border-radius: 30px;
+            padding: 40px 20px;
+            border: 2px solid #ffd700;
+            box-shadow: 0 0 30px rgba(255, 214, 0, 0.15);
+            text-align: center;
+        }
+        .coin-icon {
+            font-size: 80px;
+            filter: drop-shadow(0 0 10px #ffd700);
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .balance-label { font-size: 18px; color: #aaa; margin-bottom: 10px; }
+        .balance-value { font-size: 48px; font-weight: bold; color: #ffd700; margin-bottom: 30px; }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        .stat-item { font-size: 14px; color: #00ff00; }
+        .claim-button {
+            background: linear-gradient(45deg, #ffd700, #ffa500);
+            border: none;
+            padding: 18px 60px;
+            border-radius: 50px;
+            color: #000;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.3s;
+        }
+        .claim-button:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+
+    <div class="mining-container">
+        <div class="coin-icon">🟡</div>
+        <div class="balance-label">رصيد التعدين المتاح</div>
+        <div id="balance" class="balance-value">0.000000</div>
+        
+        <div class="stats">
+            <div class="stat-item">⚡ السرعة: 0.0001/ث</div>
+            <div class="stat-item">🛡️ الحالة: نشط</div>
+        </div>
+
+        <button class="claim-button" onclick="handleClaim()">حصد العملات (Claim)</button>
+    </div>
+
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand(); // تمديد الواجهة لكامل الشاشة
+
+        let balance = 0.000000;
+        const balanceDisplay = document.getElementById('balance');
+
+        // محاكاة التعدين التلقائي
+        setInterval(() => {
+            balance += 0.000001;
+            balanceDisplay.innerText = balance.toFixed(6);
+        }, 1000);
+
+        function handleClaim() {
+            tg.showConfirm(`هل تريد تحويل ${balance.toFixed(6)} إلى محفظتك؟`, (ok) => {
+                if (ok) {
+                    tg.showAlert("✅ تم التحويل بنجاح! سيظهر الرصيد في البوت قريباً.");
+                    balance = 0;
+                    balanceDisplay.innerText = balance.toFixed(6);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
