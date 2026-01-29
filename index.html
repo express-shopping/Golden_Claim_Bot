@@ -3,115 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Blum Clone Pro</title>
+    <title>Golden Claim Pro</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --blum-green: #c0ff00; --bg-dark: #000000; --card-gray: #111111; }
-        body { background-color: var(--bg-dark); color: white; font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; }
+        :root { --blum-green: #c0ff00; --bg-dark: #000000; --card-gray: #111111; --text-gray: #888; }
+        body { background-color: var(--bg-dark); color: white; font-family: 'Inter', sans-serif; margin: 0; overflow-x: hidden; }
         
-        /* شاشة التحميل (Blum Loading) */
-        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; transition: 0.5s; }
-        .spinner { width: 50px; height: 50px; border: 5px solid #111; border-top: 5px solid var(--blum-green); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .page { display: none; padding: 20px; animation: fadeIn 0.3s ease; padding-bottom: 100px; }
+        .active-page { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* الواجهة الرئيسية */
-        .header { padding: 20px; text-align: center; }
-        .balance-label { color: #888; font-size: 14px; margin-bottom: 5px; }
-        .balance-value { font-size: 48px; font-weight: bold; letter-spacing: -1px; }
+        /* الهيدر والرصيد */
+        .header { text-align: center; margin-bottom: 30px; margin-top: 20px; }
+        .balance-value { font-size: 56px; font-weight: bold; margin: 10px 0; letter-spacing: -2px; }
 
-        /* منطقة التعدين (التصميم النظيف) */
-        .farming-card { background: var(--card-gray); margin: 20px; padding: 25px; border-radius: 24px; border: 1px solid #222; position: relative; overflow: hidden; }
-        .farming-progress { position: absolute; bottom: 0; left: 0; height: 4px; background: var(--blum-green); width: 0%; transition: 1s linear; }
-        
-        /* زر الحركة (Blum Style Button) */
-        .action-btn { background: var(--blum-green); color: black; border: none; width: 90%; padding: 18px; border-radius: 16px; font-size: 18px; font-weight: bold; position: fixed; bottom: 100px; left: 5%; cursor: pointer; transition: 0.2s; }
-        .action-btn:active { transform: scale(0.96); opacity: 0.8; }
+        /* البطاقات والمهام */
+        .item-card { background: var(--card-gray); padding: 15px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border: 1px solid #222; }
+        .progress-container { width: 100%; height: 8px; background: #222; border-radius: 10px; margin-top: 15px; overflow: hidden; }
+        .progress-fill { width: 0%; height: 100%; background: var(--blum-green); transition: width 0.3s; }
 
-        /* القائمة السفلية الراقية */
-        .nav-bar { position: fixed; bottom: 0; width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); padding: 15px 0; border-top: 1px solid #111; }
-        .nav-item { text-align: center; font-size: 11px; color: #555; cursor: pointer; }
-        .nav-item.active { color: white; }
-        .nav-item i { font-size: 20px; display: block; margin-bottom: 5px; }
+        /* الأزرار الاحترافية */
+        .main-btn { background: var(--blum-green); color: black; border: none; width: 100%; padding: 20px; border-radius: 18px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .main-btn:active { transform: scale(0.98); }
+        .btn-small { background: #222; color: var(--blum-green); border: none; padding: 10px 20px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+
+        /* القائمة السفلية */
+        .nav-bar { position: fixed; bottom: 0; width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); padding: 15px 0; border-top: 1px solid #222; z-index: 1000; }
+        .nav-item { text-align: center; font-size: 11px; color: var(--text-gray); cursor: pointer; transition: 0.3s; }
+        .nav-item.active { color: var(--blum-green); }
+        .nav-item i { font-size: 24px; display: block; margin-bottom: 5px; }
     </style>
 </head>
 <body>
 
-    <div id="loader">
-        <div class="spinner"></div>
-        <p style="margin-top: 20px; color: var(--blum-green); font-weight: bold; letter-spacing: 2px;">BLUM IS LOADING...</p>
-    </div>
-
-    <div class="header">
-        <div class="balance-label">رصيدك الحالي</div>
-        <div class="balance-value" id="balance">0.000</div>
-    </div>
-
-    <div class="farming-card">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <div style="color: #888; font-size: 12px;">معدل الربح</div>
-                <div style="font-weight: bold;">+0.001 BP / ثانية</div>
-            </div>
-            <div style="font-size: 24px;">🌱</div>
+    <div id="home" class="page active-page">
+        <div class="header">
+            <div style="color: var(--text-gray);">رصيدك من Golden Token</div>
+            <div class="balance-value" id="balanceDisplay">0.000</div>
         </div>
-        <div style="margin-top: 20px; font-size: 14px; color: var(--blum-green);" id="statusText">جاري التعدين...</div>
-        <div class="farming-progress" id="progressBar"></div>
+        <div class="item-card" style="flex-direction: column; align-items: flex-start;">
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <span style="font-size: 24px;">🌿</span>
+                <span style="font-weight: bold;">تعدين نشط: +10.5 BP</span>
+            </div>
+            <div class="progress-container">
+                <div id="p-bar" class="progress-fill"></div>
+            </div>
+        </div>
+        <button class="main-btn" id="claimBtn" onclick="handleClaim()">بدء التعدين 🚀</button>
     </div>
 
-    <button class="action-btn" id="mainBtn" onclick="handleAction()">بدء الزراعة (Farming)</button>
+    <div id="tasks" class="page">
+        <h2 style="margin-bottom: 20px;">المهام اليومية 🔥</h2>
+        <div class="item-card">
+            <div><b>انضم لقناة المشروع</b><br><small style="color:var(--text-gray)">+500 BP</small></div>
+            <button class="btn-small" onclick="window.open('https://t.me/your_channel')">اذهب</button>
+        </div>
+        <div class="item-card">
+            <div><b>متابعة على X</b><br><small style="color:var(--text-gray)">+200 BP</small></div>
+            <button class="btn-small">تحقق</button>
+        </div>
+    </div>
+
+    <div id="frens" class="page">
+        <h2 style="text-align: center;">دعوة الأصدقاء 👥</h2>
+        <div style="background: #111; padding: 30px; border-radius: 25px; text-align: center; margin-top: 20px;">
+            <div style="font-size: 60px; margin-bottom: 20px;">🤝</div>
+            <p style="font-size: 18px;">اربح 10% مكافأة عن كل صديق ينضم إليك!</p>
+            <button class="main-btn" style="width: auto; padding: 15px 40px;" onclick="copyLink()">نسخ رابط الدعوة</button>
+        </div>
+    </div>
+
+    <div id="wallet" class="page">
+        <div style="background: linear-gradient(135deg, #111, #000); padding: 40px; border-radius: 30px; text-align: center; border: 1px solid var(--blum-green);">
+            <div style="color: var(--text-gray); margin-bottom: 10px;">إجمالي الأصول</div>
+            <div style="font-size: 38px; font-weight: bold; color: var(--blum-green);">$0.00</div>
+            <button class="btn-small" style="width: 100%; margin-top: 25px; padding: 15px;">ربط المحفظة (قريباً)</button>
+        </div>
+        <h3 style="margin-top: 30px;">عملاتك</h3>
+        <div class="item-card"><span>🟡 Golden Token</span><b id="walletBalance">0.000</b></div>
+    </div>
 
     <div class="nav-bar">
-        <div class="nav-item active"><i>🏠</i>الرئيسية</div>
-        <div class="nav-item"><i>👥</i>الإحالات</div>
-        <div class="nav-item"><i>🏆</i>المهام</div>
-        <div class="nav-item"><i>💳</i>المحفظة</div>
+        <div class="nav-item active" onclick="nav('home', this)"><i>🏠</i>الرئيسية</div>
+        <div class="nav-item" onclick="nav('tasks', this)"><i>🏆</i>المهام</div>
+        <div class="nav-item" onclick="nav('frens', this)"><i>👥</i>الأصدقاء</div>
+        <div class="nav-item" onclick="nav('wallet', this)"><i>💳</i>المحفظة</div>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
-        tg.backgroundColor = "#000000";
-        tg.headerColor = "#000000";
 
-        let balance = 0.000;
-        let isFarming = false;
+        // نظام الحفظ المحكم
+        let currentBalance = parseFloat(localStorage.getItem('g_bal')) || 0;
         let progress = 0;
+        let isMining = false;
 
-        // إخفاء اللودر بعد ثانيتين
-        setTimeout(() => {
-            document.getElementById('loader').style.opacity = '0';
-            setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
-        }, 2500);
+        function updateUI() {
+            document.getElementById('balanceDisplay').innerText = currentBalance.toFixed(3);
+            document.getElementById('walletBalance').innerText = currentBalance.toFixed(3);
+        }
+        updateUI();
 
-        function handleAction() {
-            if (!isFarming) {
-                isFarming = true;
-                document.getElementById('mainBtn').innerText = "جاري الجمع...";
-                document.getElementById('mainBtn').style.background = "#111";
-                document.getElementById('mainBtn').style.color = "#555";
-                startFarming();
+        function handleClaim() {
+            if (!isMining && progress === 0) {
+                isMining = true;
+                document.getElementById('claimBtn').innerText = "جاري التعدين... 🌱";
+                document.getElementById('claimBtn').style.opacity = "0.5";
+                
+                let interval = setInterval(() => {
+                    progress += 1;
+                    document.getElementById('p-bar').style.width = progress + "%";
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        isMining = false;
+                        document.getElementById('claimBtn').innerText = "احصد الأرباح 💰";
+                        document.getElementById('claimBtn').style.opacity = "1";
+                        tg.HapticFeedback.notificationOccurred('success');
+                    }
+                }, 100); // سرعة التعدين للتجربة
+            } else if (!isMining && progress >= 100) {
+                currentBalance += 10.500;
+                localStorage.setItem('g_bal', currentBalance);
+                progress = 0;
+                document.getElementById('p-bar').style.width = "0%";
+                document.getElementById('claimBtn').innerText = "بدء التعدين 🚀";
+                updateUI();
+                tg.showAlert("تمت إضافة 10.5 عملة إلى رصيدك!");
             }
         }
 
-        function startFarming() {
-            let interval = setInterval(() => {
-                balance += 0.001;
-                progress += 0.5;
-                document.getElementById('balance').innerText = balance.toFixed(3);
-                document.getElementById('progressBar').style.width = progress + "%";
-                
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    isFarming = false;
-                    progress = 0;
-                    document.getElementById('mainBtn').innerText = "حصد الأرباح (Claim)";
-                    document.getElementById('mainBtn').style.background = "var(--blum-green)";
-                    document.getElementById('mainBtn').style.color = "black";
-                    tg.HapticFeedback.notificationOccurred('success');
-                }
-            }, 100);
+        function nav(pageId, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+            document.getElementById(pageId).classList.add('active-page');
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            tg.HapticFeedback.impactOccurred('light');
+        }
+
+        function copyLink() {
+            tg.showAlert("تم نسخ رابط الدعوة! شاركه مع أصدقائك للربح");
         }
     </script>
 </body>
 </html>
+
