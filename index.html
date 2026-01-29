@@ -3,153 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Golden City Builder</title>
+    <title>Golden City Empire</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --gold: #f1c40f; --dark-bg: #0f1217; --glass: rgba(255, 255, 255, 0.05); }
-        body { background: var(--dark-bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow-x: hidden; }
+        :root { --gold: #f1c40f; --dark-bg: #0b0d10; --card: #161a1e; --glass: rgba(255, 255, 255, 0.03); }
+        body { background: var(--dark-bg); color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; overflow-x: hidden; user-select: none; }
         
-        /* الهيدر الشخصي */
-        .user-header { padding: 15px; display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.3); }
-        .avatar { width: 45px; height: 45px; border-radius: 12px; background: var(--gold); border: 2px solid #333; }
-        .user-info b { display: block; font-size: 14px; }
-        .user-info span { font-size: 11px; color: #888; }
+        /* الهيدر العلوي الاحترافي */
+        .user-header { padding: 15px; display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.4); border-bottom: 1px solid #222; }
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .avatar { width: 42px; height: 42px; border-radius: 10px; background: linear-gradient(45deg, #f1c40f, #d35400); border: 1px solid #444; }
+        .power-bar { background: #222; height: 6px; width: 80px; border-radius: 10px; margin-top: 5px; overflow: hidden; }
+        .power-fill { background: var(--gold); height: 100%; width: 60%; box-shadow: 0 0 10px var(--gold); }
 
-        /* منطقة الرصيد والنقر */
-        .main-section { text-align: center; padding: 20px 0; }
-        .balance-container { margin-bottom: 20px; }
-        .balance-amount { font-size: 48px; font-weight: bold; color: white; text-shadow: 0 0 20px rgba(241,196,15,0.3); }
+        /* منطقة الرصيد والتعدين */
+        .main-display { padding: 40px 0; text-align: center; }
+        .balance-label { color: #888; font-size: 14px; letter-spacing: 1px; }
+        .balance-value { font-size: 52px; font-weight: bold; margin: 5px 0; color: #fff; }
         
-        .coin-btn { width: 220px; height: 220px; background: url('https://i.ibb.co/L6M7mP0/gold-coin.png') no-repeat center; background-size: contain; margin: 0 auto; cursor: pointer; transition: 0.1s; position: relative; }
-        .coin-btn:active { transform: scale(0.92); }
+        .coin-tap { width: 230px; height: 230px; margin: 20px auto; background: radial-gradient(circle, #f39c12 0%, #d35400 100%); border-radius: 50%; border: 10px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 90px; cursor: pointer; transition: transform 0.1s; box-shadow: 0 0 50px rgba(211, 84, 0, 0.4); position: relative; }
+        .coin-tap:active { transform: scale(0.92); }
 
-        /* كروت المباني والترقية */
-        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 15px; margin-bottom: 80px; }
-        .build-card { background: var(--glass); border: 1px solid #222; border-radius: 20px; padding: 15px; text-align: right; position: relative; }
-        .build-card img { width: 40px; margin-bottom: 10px; }
-        .build-card b { display: block; font-size: 13px; }
-        .build-card .price { color: var(--gold); font-size: 12px; margin: 5px 0; display: block; }
-        .buy-btn { background: var(--gold); border: none; width: 100%; padding: 8px; border-radius: 10px; font-weight: bold; font-size: 11px; cursor: pointer; }
+        /* مكافأة الدخول اليومي */
+        #daily-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; align-items: center; justify-content: center; }
+        .modal-content { background: var(--card); padding: 30px; border-radius: 25px; width: 80%; border: 1px solid var(--gold); text-align: center; }
+        .day-box { background: #222; padding: 15px; border-radius: 15px; margin: 10px 0; border: 1px solid #333; color: var(--gold); font-weight: bold; }
 
-        /* المحفظة الزجاجية */
-        .wallet-overlay { background: linear-gradient(180deg, #1a1e26, #0f1217); padding: 25px; border-radius: 30px 30px 0 0; border-top: 2px solid var(--gold); }
+        /* شبكة المباني */
+        .section-title { padding: 0 20px; font-size: 18px; display: flex; justify-content: space-between; align-items: center; }
+        .building-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; margin-bottom: 100px; }
+        .card { background: var(--card); border-radius: 20px; padding: 15px; border: 1px solid #222; transition: 0.3s; }
+        .card:hover { border-color: var(--gold); }
+        .card b { display: block; margin-bottom: 5px; font-size: 14px; }
+        .card span { font-size: 12px; color: #f1c40f; display: block; margin-bottom: 10px; }
+        .action-btn { background: var(--gold); color: #000; border: none; width: 100%; padding: 10px; border-radius: 12px; font-weight: bold; cursor: pointer; }
 
-        /* القائمة السفلية */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; display: grid; grid-template-columns: repeat(5, 1fr); background: #000; padding: 15px 0; border-top: 1px solid #222; }
-        .nav-link { text-align: center; font-size: 10px; color: #555; cursor: pointer; }
-        .nav-link.active { color: var(--gold); }
-        .nav-link i { font-size: 20px; display: block; margin-bottom: 4px; }
+        /* شريط التنقل السفلي */
+        .nav-bar { position: fixed; bottom: 0; width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); background: #000; padding: 18px 0; border-top: 1px solid #222; }
+        .nav-btn { text-align: center; color: #555; font-size: 11px; cursor: pointer; }
+        .nav-btn.active { color: var(--gold); }
+        .nav-btn i { font-size: 22px; display: block; margin-bottom: 4px; }
     </style>
 </head>
 <body>
 
+    <div id="daily-modal">
+        <div class="modal-content">
+            <h2 style="margin:0">مكافأة اليوم! 🎁</h2>
+            <p style="color:#888">عد غداً لمكافأة أكبر</p>
+            <div class="day-box">+1,000 Golden Token</div>
+            <button class="action-btn" onclick="claimDaily()">استلام الآن</button>
+        </div>
+    </div>
+
     <div class="user-header">
-        <div class="avatar"></div>
         <div class="user-info">
-            <b>MUGAHED-54 <span style="background:#222; padding:2px 6px; border-radius:5px; color:var(--gold)">Big Boss</span></b>
-            <span>HOLDER POWER: 6/12</span>
+            <div class="avatar"></div>
+            <div>
+                <b>MUGAHED-54</b>
+                <div class="power-bar"><div class="power-fill"></div></div>
+            </div>
+        </div>
+        <div style="text-align: left;"><span style="color:#888; font-size:10px;">LEVEL</span><br><b style="color:var(--gold)">BIG BOSS</b></div>
+    </div>
+
+    <div id="p-home">
+        <div class="main-display">
+            <div class="balance-label">إجمالي الأرباح</div>
+            <div class="balance-value" id="bal">0.00</div>
+            <div class="coin-tap" onclick="tap(event)">🪙</div>
+            <div style="color:#888">الربح بالساعة: <span style="color:var(--gold)" id="inc">+0</span></div>
+        </div>
+
+        <div class="section-title">
+            <span>تطوير مدينتك 🏗️</span>
+            <small style="color:#555; font-size:12px;">المستوى 1</small>
+        </div>
+
+        <div class="building-grid">
+            <div class="card">
+                <b>🏠 مجمع سكني</b>
+                <span>+50/ساعة</span>
+                <button class="action-btn" onclick="buy(1000, 50)">تطوير (1000)</button>
+            </div>
+            <div class="card">
+                <b>🏢 برج تجاري</b>
+                <span>+250/ساعة</span>
+                <button class="action-btn" onclick="buy(5000, 250)">تطوير (5000)</button>
+            </div>
         </div>
     </div>
 
-    <div id="game-page" class="page">
-        <div class="main-section">
-            <div class="balance-container">
-                <span style="color:#888; font-size:14px;">Total Balance</span>
-                <div class="balance-amount" id="mainBal">0.00</div>
-            </div>
-            
-            <div class="coin-btn" onclick="tapCoin(event)">
-                <div style="font-size:80px; padding-top:45px;">🪙</div>
-            </div>
-            <p style="color:#555; margin-top:15px;">Income per hour: <span id="hIncome" style="color:var(--gold)">+0</span></p>
-        </div>
-
-        <div class="grid-container">
-            <div class="build-card">
-                <b>🏘️ سكن العمال</b>
-                <span class="price">السعر: 500 GT</span>
-                <button class="buy-btn" onclick="buyBuild(500, 15)">شراء +15/h</button>
-            </div>
-            <div class="build-card">
-                <b>🏢 مركز تجاري</b>
-                <span class="price">السعر: 2000 GT</span>
-                <button class="buy-btn" onclick="buyBuild(2000, 80)">شراء +80/h</button>
-            </div>
+    <div id="p-wallet" style="display:none; padding:30px;">
+        <div style="background:linear-gradient(135deg, #1e2228, #000); padding:40px; border-radius:30px; border:1px solid var(--gold); text-align:center;">
+            <div style="color:#888">الرصيد القابل للسحب</div>
+            <div style="font-size:40px; margin:15px 0; font-weight:bold;">$0.00</div>
+            <button style="background:transparent; color:var(--gold); border:1px solid var(--gold); padding:12px 25px; border-radius:15px;">ربط المحفظة (قريباً)</button>
         </div>
     </div>
 
-    <div id="wallet-page" class="page" style="display:none; padding:20px;">
-        <div class="wallet-overlay">
-            <h3 style="margin:0">خزنة المدينة 💰</h3>
-            <div style="font-size:32px; margin:20px 0;" id="walletBal">0.00 GT</div>
-            <button style="width:100%; padding:15px; border-radius:15px; background:#222; color:var(--gold); border:1px solid #444;">ربط محفظة TON (قريباً)</button>
-        </div>
-    </div>
-
-    <nav class="bottom-nav">
-        <div class="nav-link active" onclick="showP('game-page', this)"><i>🏠</i>المدينة</div>
-        <div class="nav-link" onclick="showP('tasks-page', this)"><i>🏆</i>المهام</div>
-        <div class="nav-link" onclick="showP('friends-page', this)"><i>👥</i>الأصدقاء</div>
-        <div class="nav-link" onclick="showP('wallet-page', this)"><i>💳</i>المحفظة</div>
+    <nav class="nav-bar">
+        <div class="nav-btn active" onclick="nav('p-home', this)"><i>🏙️</i>المدينة</div>
+        <div class="nav-btn" onclick="nav('p-tasks', this)"><i>📋</i>المهام</div>
+        <div class="nav-btn" onclick="nav('p-frens', this)"><i>👥</i>الأصدقاء</div>
+        <div class="nav-btn" onclick="nav('p-wallet', this)"><i>💳</i>المحفظة</div>
     </nav>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
 
-        let bal = parseFloat(localStorage.getItem('city_bal')) || 0;
-        let income = parseFloat(localStorage.getItem('city_inc')) || 0;
+        let bal = parseFloat(localStorage.getItem('g_bal')) || 0;
+        let inc = parseFloat(localStorage.getItem('g_inc')) || 0;
+        let lastDaily = localStorage.getItem('g_last_daily');
 
-        function update() {
-            document.getElementById('mainBal').innerText = bal.toLocaleString();
-            document.getElementById('walletBal').innerText = bal.toLocaleString() + " GT";
-            document.getElementById('hIncome').innerText = "+" + income;
-            localStorage.setItem('city_bal', bal);
-            localStorage.setItem('city_inc', income);
+        function updateUI() {
+            document.getElementById('bal').innerText = bal.toLocaleString(undefined, {minimumFractionDigits: 2});
+            document.getElementById('inc').innerText = "+" + inc.toLocaleString();
+            localStorage.setItem('g_bal', bal);
+            localStorage.setItem('g_inc', inc);
         }
 
-        function tapCoin(e) {
+        // فحص المكافأة اليومية
+        window.onload = () => {
+            let today = new Date().toDateString();
+            if(lastDaily !== today) {
+                document.getElementById('daily-modal').style.display = 'flex';
+            }
+            updateUI();
+        }
+
+        function claimDaily() {
+            bal += 1000;
+            localStorage.setItem('g_last_daily', new Date().toDateString());
+            document.getElementById('daily-modal').style.display = 'none';
+            tg.showAlert("مبروك! استلمت 1,000 عملة هدية اليوم! 🎁");
+            updateUI();
+        }
+
+        function tap(e) {
             bal += 1;
             tg.HapticFeedback.impactOccurred('medium');
-            update();
-            // أنيميشن النقر
-            let x = e.clientX; let y = e.clientY;
-            let div = document.createElement('div');
-            div.innerHTML = "+1";
-            div.style.cssText = `position:fixed; left:${x}px; top:${y}px; color:var(--gold); font-weight:bold; pointer-events:none; animation: fadeUp 1s forwards;`;
-            document.body.appendChild(div);
-            setTimeout(()=> div.remove(), 1000);
+            updateUI();
+            createFloatText(e.clientX, e.clientY, "+1");
         }
 
-        function buyBuild(price, addInc) {
-            if(bal >= price) {
-                bal -= price;
-                income += addInc;
-                update();
-                tg.showAlert("تم بناء المنشأة بنجاح! 🏗️");
+        function buy(cost, earn) {
+            if(bal >= cost) {
+                bal -= cost;
+                inc += earn;
+                updateUI();
+                tg.showAlert("تم تطوير المبنى! زادت أرباحك بالساعة 🚀");
             } else {
-                tg.showAlert("رصيدك غير كافٍ للبناء!");
+                tg.showAlert("عذراً، تحتاج رصيد أكثر!");
             }
         }
 
-        function showP(id, el) {
-            document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-            document.getElementById(id).style.display = 'block';
-            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+        function nav(id, el) {
+            document.getElementById('p-home').style.display = (id === 'p-home') ? 'block' : 'none';
+            document.getElementById('p-wallet').style.display = (id === 'p-wallet') ? 'block' : 'none';
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             el.classList.add('active');
         }
 
-        setInterval(() => {
-            bal += (income / 3600);
-            update();
-        }, 1000);
+        function createFloatText(x, y, txt) {
+            let d = document.createElement('div');
+            d.innerHTML = txt;
+            d.style.cssText = `position:fixed; left:${x}px; top:${y}px; color:var(--gold); font-weight:bold; pointer-events:none; animation: up 0.8s forwards;`;
+            document.body.appendChild(d);
+            setTimeout(() => d.remove(), 800);
+        }
 
-        update();
+        setInterval(() => { bal += (inc / 3600); updateUI(); }, 1000);
     </script>
-
-    <style>
-        @keyframes fadeUp { to { transform: translateY(-50px); opacity: 0; } }
-    </style>
+    <style> @keyframes up { to { transform: translateY(-80px); opacity: 0; } } </style>
 </body>
 </html>
 
