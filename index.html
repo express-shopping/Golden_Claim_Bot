@@ -3,88 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Golden City | Empire Edition</title>
+    <title>Golden City | Total Fix</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: linear-gradient(180deg, #ffdf00 0%, #b8860b 100%); --glass: rgba(255, 255, 255, 0.08); }
+        :root { --gold: #f1c40f; --bg: #0a0a0a; --card: #161616; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; background: #000; color: white; font-family: 'Cairo', sans-serif; height: 100vh; overflow: hidden; }
-        .app { height: 100vh; display: flex; flex-direction: column; padding: 15px; background: radial-gradient(circle at 50% 30%, #222 0%, #000 70%); }
-
-        /* شاشات اللعبة */
-        .screen { display: none; flex-direction: column; height: 100%; align-items: center; }
-        .active-screen { display: flex; }
-
-        /* الرصيد والطاقة */
-        .balance { font-size: 50px; font-weight: 900; background: var(--gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 20px 0; }
-        .coin { width: 250px; height: 250px; cursor: pointer; transition: 0.1s; z-index: 10; }
-        .coin:active { transform: scale(0.9); }
-        .energy-bar { width: 100%; height: 12px; background: #222; border-radius: 10px; overflow: hidden; border: 1px solid #333; margin-top: 10px; }
-        .energy-fill { width: 100%; height: 100%; background: var(--gold); transition: 0.2s; }
-
-        /* واجهة الأصدقاء */
-        .friend-card { background: var(--glass); border: 1px solid rgba(255,215,0,0.2); width: 100%; border-radius: 20px; padding: 20px; text-align: center; margin-top: 20px; }
-        .invite-btn { background: var(--gold); border: none; padding: 12px 25px; border-radius: 15px; font-weight: 900; cursor: pointer; margin-top: 15px; width: 100%; font-family: 'Cairo'; }
-
-        /* التنقل */
-        .nav { position: fixed; bottom: 15px; width: 92%; background: rgba(15,15,15,0.95); border: 1px solid #333; border-radius: 25px; display: flex; justify-content: space-around; padding: 12px; backdrop-filter: blur(15px); }
-        .nav-item { color: #555; text-decoration: none; font-size: 11px; text-align: center; cursor: pointer; }
-        .nav-item.active { color: #f1c40f; }
-        .nav-item i { font-size: 22px; display: block; }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Cairo', sans-serif; height: 100vh; overflow: hidden; }
         
-        .pop { position: absolute; color: #fff; font-size: 35px; font-weight: 900; pointer-events: none; animation: fly 0.6s forwards; }
-        @keyframes fly { to { opacity: 0; transform: translateY(-150px); } }
+        .container { height: 100vh; display: flex; flex-direction: column; padding: 20px; position: relative; }
+        
+        /* شريط المعلومات العلوي */
+        .header { display: flex; justify-content: space-between; margin-bottom: 20px; z-index: 10; }
+        .user-info { background: var(--card); padding: 5px 15px; border-radius: 12px; border: 1px solid #333; }
+        
+        /* الشاشات */
+        .screen { display: none; flex-direction: column; align-items: center; flex-grow: 1; width: 100%; animation: fadeIn 0.3s; }
+        .active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* شاشة المدينة (النقر) */
+        .balance-val { font-size: 50px; font-weight: 900; color: var(--gold); margin: 20px 0; }
+        .coin-btn { width: 220px; height: 220px; background: url('https://img.icons8.com/emoji/400/coin-emoji.png'); background-size: contain; cursor: pointer; transition: 0.1s; filter: drop-shadow(0 0 20px rgba(241,196,15,0.2)); }
+        .coin-btn:active { transform: scale(0.9); }
+        .energy-box { width: 100%; margin-top: 30px; }
+        .energy-bar { height: 10px; background: #222; border-radius: 5px; overflow: hidden; margin-top: 8px; }
+        .energy-fill { height: 100%; background: var(--gold); width: 100%; transition: 0.3s; }
+
+        /* شاشة المحفظة */
+        .wallet-card { background: linear-gradient(135deg, #1e1e1e, #111); width: 100%; border-radius: 20px; padding: 30px; text-align: center; border: 1px solid #333; margin-top: 20px; }
+        .withdraw-btn { background: var(--gold); color: #000; border: none; padding: 12px 30px; border-radius: 12px; font-weight: bold; margin-top: 20px; width: 100%; font-family: 'Cairo'; }
+
+        /* شاشة الأصدقاء */
+        .ref-box { background: var(--card); border-radius: 15px; padding: 20px; width: 100%; text-align: center; border: 1px solid #333; }
+
+        /* القائمة السفلية */
+        .nav { position: fixed; bottom: 0; left: 0; right: 0; background: #000; display: flex; justify-content: space-around; padding: 15px; border-top: 1px solid #222; }
+        .nav-item { color: #555; text-align: center; font-size: 11px; cursor: pointer; flex: 1; }
+        .nav-item.active-nav { color: var(--gold); }
+        .nav-item i { font-size: 20px; display: block; margin-bottom: 5px; }
+
+        /* رقم النقر */
+        .pop { position: absolute; color: #fff; font-weight: 900; font-size: 30px; pointer-events: none; animation: fly 0.6s forwards; z-index: 100; }
+        @keyframes fly { to { transform: translateY(-100px); opacity: 0; } }
     </style>
 </head>
 <body>
 
-    <div class="app">
-        <div id="city-screen" class="screen active-screen">
-            <div style="color: #888;">ثروة MUGAHED-54</div>
-            <div class="balance" id="bal">0</div>
-            <img src="https://cdni.iconscout.com/illustration/premium/thumb/golden-coin-5379654-4503130.png" class="coin" id="coin">
-            <div style="width: 80%; margin-top: 40px;">
-                <div style="display:flex; justify-content:space-between; font-size:14px; margin-bottom:5px;">
-                    <span>⚡ الطاقة</span> <span id="nrg-txt">1000/1000</span>
-                </div>
-                <div class="energy-bar"><div class="energy-fill" id="nrg-fill"></div></div>
+    <div class="container">
+        <div class="header">
+            <div class="user-info"><span style="color:#888; font-size:10px;">LEVEL</span><br><b>BIG BOSS 👑</b></div>
+            <div class="user-info" style="text-align:left;"><span style="color:#888; font-size:10px;">USER</span><br><b>MUGAHED-54</b></div>
+        </div>
+
+        <div id="city" class="screen active">
+            <div style="color:#888;">إجمالي الأرباح</div>
+            <div class="balance-val" id="bal">0</div>
+            <div class="coin-btn" id="tap-btn"></div>
+            <div class="energy-box">
+                <div style="display:flex; justify-content:space-between; font-size:13px;"><span>⚡ الطاقة</span><span id="eng-text">1000/1000</span></div>
+                <div class="energy-bar"><div class="energy-fill" id="eng-fill"></div></div>
             </div>
         </div>
 
-        <div id="friends-screen" class="screen">
-            <h2 style="color: #f1c40f; margin-top: 30px;">دعوة الأصدقاء</h2>
-            <div class="friend-card">
-                <p>لكل صديق تدعوه، ستحصل على:</p>
-                <h3 style="color: #f1c40f;">+50,000 🪙</h3>
-                <p style="font-size: 12px; color: #888;">شارك رابطك الخاص أدناه:</p>
-                <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:10px; font-size:10px; word-break:break-all;" id="ref-link">
-                    https://t.me/Golden_Claim_Bot?start=user54
-                </div>
-                <button class="invite-btn" onclick="copyLink()">نسخ رابط الدعوة 📋</button>
+        <div id="friends" class="screen">
+            <h2>دعوة الأصدقاء 👥</h2>
+            <div class="ref-box">
+                <p>احصل على <b style="color:var(--gold);">50,000</b> عن كل صديق</p>
+                <div style="background:#000; padding:10px; border-radius:10px; font-size:10px; margin:15px 0;">https://t.me/Golden_Claim_Bot?start=ref54</div>
+                <button class="withdraw-btn" onclick="alert('تم نسخ الرابط!')">نسخ الرابط</button>
+            </div>
+        </div>
+
+        <div id="wallet" class="screen">
+            <h2>محفظتك 💳</h2>
+            <div class="wallet-card">
+                <div style="color:#888; margin-bottom:10px;">الرصيد القابل للسحب</div>
+                <div style="font-size:35px; font-weight:900;">$ <span id="usd">0.00</span></div>
+                <button class="withdraw-btn">ربط المحفظة (قريباً)</button>
             </div>
         </div>
 
         <nav class="nav">
-            <div class="nav-item active" onclick="tab('city')"><i>🏙️</i>المدينة</div>
-            <div class="nav-item" onclick="tab('friends')"><i>👥</i>الأصدقاء</div>
-            <div class="nav-item"><i>💳</i>المحفظة</div>
+            <div class="nav-item active-nav" onclick="show('city', this)"><i>🏙️</i>المدينة</div>
+            <div class="nav-item" onclick="show('friends', this)"><i>👥</i>الأصدقاء</div>
+            <div class="nav-item" onclick="show('wallet', this)"><i>💳</i>المحفظة</div>
         </nav>
     </div>
 
     <script>
-        let b = parseInt(localStorage.getItem('b')) || 0;
-        let e = parseInt(localStorage.getItem('e')) || 1000;
-        const maxE = 1000;
-
+        let b = parseInt(localStorage.getItem('gold_b')) || 0;
+        let e = parseInt(localStorage.getItem('gold_e')) || 1000;
+        
         function update() {
             document.getElementById('bal').innerText = b.toLocaleString();
-            document.getElementById('nrg-txt').innerText = `${e}/${maxE}`;
-            document.getElementById('nrg-fill').style.width = (e/maxE*100)+'%';
-            localStorage.setItem('b', b);
-            localStorage.setItem('e', e);
+            document.getElementById('usd').innerText = (b / 100000).toFixed(2);
+            document.getElementById('eng-text').innerText = `${e}/1000`;
+            document.getElementById('eng-fill').style.width = (e/1000*100) + '%';
+            localStorage.setItem('gold_b', b);
+            localStorage.setItem('gold_e', e);
         }
 
-        document.getElementById('coin').addEventListener('touchstart', (ev) => {
+        document.getElementById('tap-btn').addEventListener('touchstart', (ev) => {
             ev.preventDefault();
             if(e > 0) {
                 b++; e--; update();
@@ -98,21 +117,14 @@
             }
         });
 
-        setInterval(() => { if(e < maxE) { e++; update(); } }, 1500);
-
-        function tab(t) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            document.getElementById(t+'-screen').classList.add('active-screen');
-            event.currentTarget.classList.add('active');
+        function show(id, el) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active-nav'));
+            document.getElementById(id).classList.add('active');
+            el.classList.add('active-nav');
         }
 
-        function copyLink() {
-            const link = document.getElementById('ref-link').innerText;
-            navigator.clipboard.writeText(link);
-            alert("تم نسخ الرابط! أرسله لأصدقائك الآن 🚀");
-        }
-
+        setInterval(() => { if(e < 1000) { e++; update(); } }, 2000);
         update();
     </script>
 </body>
