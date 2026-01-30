@@ -3,105 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Golden Claim | Mining Pro</title>
+    <title>Golden Claim | Pro Max</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #f3ba2f; --bg: #0b0e11; --card: #1c1f24; }
+        :root { --gold: #f3ba2f; --bg: #0b0e11; --card: #1c1f24; --green: #00ff88; }
         body { margin: 0; background: var(--bg); color: white; font-family: 'Montserrat', sans-serif; overflow: hidden; height: 100vh; }
-        .app { height: 100vh; display: flex; flex-direction: column; padding: 15px; }
         
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .u-info { display: flex; align-items: center; gap: 10px; background: var(--card); padding: 8px 15px; border-radius: 20px; border: 1px solid #333; }
-        .u-info img { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--gold); }
+        /* تصميم التنبيهات الراقي */
+        #toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); padding: 12px 25px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.2); font-size: 13px; font-weight: bold; z-index: 1000; display: none; transition: 0.3s; animation: slideUp 0.4s ease; }
+        @keyframes slideUp { from { bottom: 50px; opacity: 0; } to { bottom: 100px; opacity: 1; } }
 
-        .screen { display: none; flex-direction: column; align-items: center; flex-grow: 1; overflow-y: auto; padding-bottom: 100px; width: 100%; }
+        .app { height: 100vh; display: flex; flex-direction: column; padding: 15px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        
+        /* زر المحفظة المطور */
+        #ton-connect-btn { background: #0088cc; color: white; border: none; padding: 10px 18px; border-radius: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .connected-status { background: var(--green) !important; box-shadow: 0 0 15px var(--green); }
+
+        .screen { display: none; flex-direction: column; align-items: center; flex-grow: 1; overflow-y: auto; padding-bottom: 120px; }
         .active { display: flex; }
 
-        /* Mining Center */
-        .mining-container { background: linear-gradient(180deg, #1c1f24 0%, #0b0e11 100%); width: 100%; border-radius: 30px; padding: 30px; text-align: center; border: 1px solid #333; }
-        .balance-title { color: #888; font-size: 14px; margin-bottom: 5px; }
-        .main-balance { font-size: 40px; font-weight: 900; color: white; margin-bottom: 25px; }
-        
-        .mine-btn { 
-            width: 200px; height: 200px; border-radius: 50%; border: none;
-            background: radial-gradient(circle, var(--gold) 0%, #8a6d1f 100%);
-            box-shadow: 0 0 30px rgba(243, 186, 47, 0.2); color: black;
-            font-size: 20px; font-weight: 900; cursor: pointer; transition: 0.3s;
-        }
-        .mine-btn:disabled { background: #333; color: #888; box-shadow: none; cursor: not-allowed; }
+        /* دائرة التعدين المتحركة */
+        .mining-circle-container { position: relative; width: 220px; height: 220px; margin: 20px 0; }
+        .mining-circle { width: 100%; height: 100%; border-radius: 50%; background: radial-gradient(circle, #2c2f35 0%, #000 100%); border: 8px solid #1c1f24; display: flex; align-items: center; justify-content: center; position: relative; z-index: 2; transition: 0.5s; }
+        .mining-active { border-color: var(--gold); animation: pulse 2s infinite ease-in-out; }
+        .glow-effect { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; background: var(--gold); filter: blur(40px); opacity: 0; transition: 0.5s; }
+        .mining-active + .glow-effect { opacity: 0.15; }
 
-        /* Upgrades & Cards */
-        .card { background: var(--card); width: 100%; border-radius: 20px; padding: 15px; border: 1px solid #333; margin-top: 15px; }
-        .btn-action { background: var(--gold); color: black; border: none; padding: 12px; border-radius: 12px; font-weight: 900; width: 100%; margin-top: 10px; cursor: pointer; }
-        
+        @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(243, 186, 47, 0.4); } 70% { transform: scale(1.02); box-shadow: 0 0 0 20px rgba(243, 186, 47, 0); } 100% { transform: scale(1); } }
+
+        .main-balance { font-size: 45px; font-weight: 900; margin: 10px 0; letter-spacing: -1px; }
+        .card { background: var(--card); width: 100%; border-radius: 25px; padding: 20px; border: 1px solid #333; margin-top: 15px; box-sizing: border-box; }
+        .btn-gold { background: var(--gold); color: black; border: none; padding: 15px; border-radius: 18px; font-weight: 900; width: 100%; cursor: pointer; transition: 0.2s; }
+        .btn-gold:active { transform: scale(0.98); }
+
         /* Navigation */
-        .nav { position: fixed; bottom: 15px; left: 15px; right: 15px; background: rgba(28, 31, 36, 0.95); border-radius: 25px; display: flex; justify-content: space-around; padding: 15px; border: 1px solid #333; backdrop-filter: blur(10px); }
-        .nav-item { color: #666; text-align: center; font-size: 10px; font-weight: bold; cursor: pointer; }
-        .nav-item.active { color: var(--gold); }
+        .nav { position: fixed; bottom: 20px; left: 20px; right: 20px; background: rgba(28, 31, 36, 0.8); backdrop-filter: blur(20px); border-radius: 30px; display: flex; justify-content: space-around; padding: 15px; border: 1px solid #333; }
+        .nav-item { color: #666; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .nav-item.active { color: var(--gold); transform: translateY(-3px); }
     </style>
 </head>
 <body>
 
+<div id="toast">Copied! 🚀</div>
+
 <div class="app">
     <div class="header">
-        <div class="u-info">
-            <img id="u-avatar" src="">
-            <span id="u-name">Loading...</span>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <img id="u-avatar" src="" style="width:35px; border-radius:50%; border:2px solid var(--gold);">
+            <span id="u-name" style="font-weight:900; font-size:14px;">...</span>
         </div>
-        <div id="ton-connect"></div>
+        <button id="ton-connect-btn" onclick="toggleWallet()">Connect Wallet</button>
     </div>
 
     <div id="home" class="screen active">
-        <div class="mining-container">
-            <div class="balance-title">AVAILABLE ASSETS</div>
-            <div class="main-balance" id="balance">0.00</div>
-            
-            <button id="mine-btn" class="mine-btn" onclick="startMining()">START MINING</button>
-            <div id="timer" style="margin-top: 15px; font-weight: 900; color: var(--gold);"></div>
-            
-            <div style="margin-top: 25px; display: flex; justify-content: space-around;">
-                <div><small style="color:#888">Speed</small><br><b id="speed-val">0.01/h</b></div>
-                <div><small style="color:#888">Storage</small><br><b>6 Hours</b></div>
+        <div style="color:#888; font-size:12px; font-weight:bold;">AVAILABLE ASSETS</div>
+        <div class="main-balance" id="balance">0.0000</div>
+
+        <div class="mining-circle-container">
+            <div id="circle-element" class="mining-circle">
+                <span id="circle-text" style="font-size:24px; font-weight:900; color:#444;">IDLE</span>
             </div>
+            <div class="glow-effect"></div>
         </div>
 
-        <div class="card">
-            <h3>Boost Mining Speed</h3>
-            <p style="font-size: 12px; color: #888;">Increase your hourly rate by 0.05</p>
-            <button class="btn-action" onclick="upgradeSpeed()">Upgrade (10.00 Gold)</button>
+        <div id="timer" style="font-weight:900; color:var(--gold); margin-bottom:15px;">Ready to Mine</div>
+        <button id="mine-btn" class="btn-gold" onclick="startMining()">START MINING</button>
+
+        <div style="display:flex; width:100%; gap:15px; margin-top:20px;">
+            <div class="card" style="margin:0; flex:1; text-align:center;">
+                <small style="color:#888">Speed</small><br><b id="speed-val">0.01/h</b>
+            </div>
+            <div class="card" style="margin:0; flex:1; text-align:center;">
+                <small style="color:#888">Time</small><br><b>6 Hours</b>
+            </div>
         </div>
     </div>
 
     <div id="wallet" class="screen">
-        <div class="mining-container" style="padding: 40px 20px;">
-            <h2>Withdraw Assets</h2>
-            <div class="main-balance" id="with-bal">0.00</div>
-            <p style="font-size: 12px; color: #888;">Enter Amount to Withdraw to TON Wallet</p>
-            <button class="btn-action" onclick="requestWithdraw()">SEND REQUEST</button>
+        <div class="card" style="text-align:center;">
+            <h2>Withdraw</h2>
+            <div class="main-balance" id="with-bal" style="color:var(--gold)">0.0000</div>
+            <p style="color:#888; font-size:12px;">Minimum to withdraw is 100.00 Gold</p>
+            <button class="btn-gold" onclick="requestWithdraw()">CONFIRM WITHDRAW</button>
         </div>
     </div>
 
     <div id="friends" class="screen">
-        <h2>Invite Friends</h2>
+        <h2>Referral System</h2>
         <div class="card">
-            <p>Your Referral Link:</p>
-            <div style="background:#000; padding:10px; border-radius:10px; font-size:10px; margin-bottom:10px;" id="ref-link">https://t.me/GoldenClaim_Bot?ref=user</div>
-            <button class="btn-action" onclick="copyLink()">COPY LINK</button>
+            <p style="font-size:12px; color:#aaa;">Invite friends and get 10% of their mining!</p>
+            <div style="background:#000; padding:15px; border-radius:15px; font-size:11px; margin:10px 0; word-break:break-all;" id="ref-link">
+                https://t.me/GoldenClaim_Bot?ref=user123
+            </div>
+            <button class="btn-gold" onclick="copyLink()">COPY INVITE LINK</button>
         </div>
-    </div>
-
-    <div id="admin" class="screen">
-        <h2 style="color:red">ADMIN CONTROL</h2>
-        <div id="admin-content" style="width:100%"></div>
     </div>
 
     <nav class="nav">
         <div class="nav-item active" onclick="showTab('home', this)">Mining</div>
         <div class="nav-item" onclick="showTab('friends', this)">Friends</div>
         <div class="nav-item" onclick="showTab('wallet', this)">Wallet</div>
-        <div class="nav-item" id="admin-tab" style="display:none;" onclick="showTab('admin', this)">Admin</div>
     </nav>
 </div>
 
@@ -109,80 +113,86 @@
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    // إعدادات المحفظة
+    // إعداد المحفظة
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
         manifestUrl: 'https://raw.githubusercontent.com/ton-community/tutorials/main/03-client/test/public/tonconnect-manifest.json',
-        buttonRootId: 'ton-connect'
+        buttonRootId: 'ton-connect-btn'
     });
 
-    // بيانات المستخدم واللعبة
+    // مراقبة حالة المحفظة لتغيير لون الزر
+    tonConnectUI.onStatusChange(wallet => {
+        const btn = document.getElementById('ton-connect-btn');
+        if (wallet) {
+            btn.innerText = "Connected ✅";
+            btn.classList.add('connected-status');
+            showToast("Wallet Linked Successfully! 🦊");
+        } else {
+            btn.innerText = "Connect Wallet";
+            btn.classList.remove('connected-status');
+        }
+    });
+
     let balance = parseFloat(localStorage.getItem('g_bal')) || 0;
-    let speed = parseFloat(localStorage.getItem('g_speed')) || 0.01;
+    let speed = parseFloat(localStorage.getItem('g_speed')) || 0.05;
     let miningEndTime = localStorage.getItem('g_end_time') || null;
-    const adminID = 12345678; // ضع هنا الـ ID الخاص بك
 
     function updateUI() {
         document.getElementById('balance').innerText = balance.toFixed(4);
         document.getElementById('with-bal').innerText = balance.toFixed(4);
         document.getElementById('speed-val').innerText = speed.toFixed(2) + "/h";
         document.getElementById('u-name').innerText = tg.initDataUnsafe.user?.first_name || "Mugahed";
-        document.getElementById('u-avatar').src = tg.initDataUnsafe.user?.photo_url || "https://via.placeholder.com/30";
-        
-        if(tg.initDataUnsafe.user?.id === adminID) document.getElementById('admin-tab').style.display = "block";
-        
+        document.getElementById('u-avatar').src = tg.initDataUnsafe.user?.photo_url || "https://via.placeholder.com/35";
         localStorage.setItem('g_bal', balance);
-        localStorage.setItem('g_speed', speed);
     }
 
-    // نظام التعدين الزمني
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg;
+        t.style.display = 'block';
+        setTimeout(() => { t.style.display = 'none'; }, 2500);
+    }
+
     function startMining() {
         if (!miningEndTime) {
-            const endTime = Date.now() + (6 * 60 * 60 * 1000); // 6 ساعات
-            localStorage.setItem('g_end_time', endTime);
-            miningEndTime = endTime;
-            checkMining();
+            miningEndTime = Date.now() + (6 * 60 * 60 * 1000);
+            localStorage.setItem('g_end_time', miningEndTime);
+            showToast("Mining Started! See you in 6h ⛏️");
         }
     }
 
     function checkMining() {
+        const circle = document.getElementById('circle-element');
+        const text = document.getElementById('circle-text');
+        const btn = document.getElementById('mine-btn');
+
         if (miningEndTime) {
-            const now = Date.now();
-            const diff = miningEndTime - now;
-            
+            const diff = miningEndTime - Date.now();
             if (diff > 0) {
-                document.getElementById('mine-btn').disabled = true;
-                document.getElementById('mine-btn').innerText = "MINING...";
-                const hours = Math.floor(diff / 3600000);
-                const mins = Math.floor((diff % 3600000) / 60000);
-                document.getElementById('timer').innerText = `Time Left: ${hours}h ${mins}m`;
+                circle.classList.add('mining-active');
+                text.innerText = "MINING...";
+                text.style.color = "var(--gold)";
+                btn.disabled = true;
+                btn.style.opacity = "0.5";
+                const h = Math.floor(diff/3600000);
+                const m = Math.floor((diff%3600000)/60000);
+                document.getElementById('timer').innerText = `Time Remaining: ${h}h ${m}m`;
             } else {
-                // انتهاء التعدين - إضافة الرصيد
                 balance += (speed * 6);
-                localStorage.removeItem('g_end_time');
                 miningEndTime = null;
-                document.getElementById('mine-btn').disabled = false;
-                document.getElementById('mine-btn').innerText = "CLAIM & RESTART";
-                document.getElementById('timer').innerText = "Mining Finished!";
+                localStorage.removeItem('g_end_time');
+                circle.classList.remove('mining-active');
+                text.innerText = "CLAIM";
+                btn.disabled = false;
+                btn.style.opacity = "1";
+                document.getElementById('timer').innerText = "Mining Finished! Claim your reward.";
+                updateUI();
             }
         }
-        updateUI();
     }
 
-    // نسخ الرابط
     function copyLink() {
-        const link = document.getElementById('ref-link').innerText;
-        const tempInput = document.createElement("input");
-        tempInput.value = link;
-        document.body.appendChild(tempInput);
-        tempInput.select();
-        document.execCommand("copy");
-        document.body.removeChild(tempInput);
-        alert("Link Copied Successfully! 🚀");
-    }
-
-    function upgradeSpeed() {
-        if(balance >= 10) { balance -= 10; speed += 0.05; updateUI(); alert("Speed Upgraded!"); }
-        else { alert("Need 10.00 Gold!"); }
+        navigator.clipboard.writeText(document.getElementById('ref-link').innerText);
+        showToast("Link Copied Successfully! 🚀");
     }
 
     function showTab(id, el) {
