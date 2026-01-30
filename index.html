@@ -3,180 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Golden Claim | Pro Max</title>
+    <title>Golden Claim | Evolution</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #FFD700; --bg: #000000; --card: #111111; --accent: #ffffff; }
+        :root { --gold: #FFD700; --silver: #C0C0C0; --bronze: #CD7F32; --bg: #000; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Montserrat', sans-serif; overflow: hidden; height: 100vh; }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Montserrat', sans-serif; height: 100vh; overflow: hidden; }
         
-        .app { height: 100vh; display: flex; flex-direction: column; padding: 20px; background: radial-gradient(circle at 50% 10%, #1a1a1a 0%, #000 100%); }
+        .app { height: 100vh; display: flex; flex-direction: column; padding: 20px; background: radial-gradient(circle at 50% 0%, #1a1a1a 0%, #000 100%); }
 
-        /* User Header */
-        .u-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .u-profile { display: flex; align-items: center; gap: 12px; }
-        .u-avatar { width: 45px; height: 45px; border-radius: 12px; border: 2px solid var(--gold); box-shadow: 0 0 10px var(--gold); }
-        .u-rank { background: linear-gradient(90deg, #FFD700, #b8860b); color: #000; padding: 2px 10px; border-radius: 8px; font-size: 10px; font-weight: 900; }
+        /* المستويات والألقاب */
+        .level-header { display: flex; flex-direction: column; align-items: center; margin-bottom: 10px; }
+        .rank-name { color: var(--gold); font-weight: 900; font-size: 18px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; }
+        .xp-container { width: 60%; height: 6px; background: #222; border-radius: 10px; overflow: hidden; border: 1px solid #333; }
+        .xp-bar { height: 100%; background: linear-gradient(90deg, #fff, var(--gold)); width: 0%; transition: 0.5s; }
 
-        .screen { display: none; flex-direction: column; align-items: center; flex-grow: 1; animation: scaleUp 0.3s ease; }
+        .screen { display: none; flex-direction: column; align-items: center; flex-grow: 1; animation: fadeIn 0.3s; }
         .active { display: flex; }
-        @keyframes scaleUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Home UI - المميز والراقي */
-        .score-display { text-align: center; margin: 15px 0; }
-        .score-label { font-size: 12px; color: #666; letter-spacing: 3px; margin-bottom: 5px; }
-        .score-val { font-size: 55px; font-weight: 900; color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.4); }
-        .profit-info { font-size: 11px; color: var(--gold); font-weight: bold; background: rgba(255,215,0,0.1); padding: 5px 15px; border-radius: 20px; margin-top: 10px; }
+        /* رصيد الذهب */
+        .balance-box { text-align: center; margin: 15px 0; }
+        .balance-val { font-family: 'Orbitron', sans-serif; font-size: 48px; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 10px; }
+        .coin-mini { width: 40px; height: 40px; background: var(--gold); border-radius: 50%; display: inline-block; box-shadow: 0 0 10px var(--gold); }
 
-        /* 3D Coin Effect */
-        .coin-container { position: relative; margin: 40px 0; }
-        .coin-btn {
-            width: 280px; height: 280px; border-radius: 50%;
+        /* العملة الكبيرة */
+        .coin-wrap { position: relative; margin: 30px 0; }
+        .main-coin {
+            width: 270px; height: 270px; border-radius: 50%;
             background: radial-gradient(circle, #FFE552 0%, #BA8B02 70%);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8), inset 0 -10px 20px rgba(0,0,0,0.4);
-            border: 8px solid #222; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: transform 0.05s ease;
+            border: 10px solid #1a1a1a; box-shadow: 0 0 40px rgba(255,215,0,0.2);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: transform 0.05s;
         }
-        .coin-btn:active { transform: scale(0.92); }
-        .coin-inner { font-size: 140px; font-weight: 900; color: rgba(0,0,0,0.1); }
+        .main-coin:active { transform: scale(0.92); }
+        .main-coin::after { content: "G"; font-family: 'Orbitron'; font-size: 120px; color: rgba(0,0,0,0.1); }
 
-        /* Floating Numbers */
-        .floating-num { position: absolute; color: white; font-size: 32px; font-weight: 900; pointer-events: none; animation: floatUp 0.7s forwards; }
-        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-150px); } }
+        /* الأرقام الطائرة */
+        .pop { position: absolute; color: #fff; font-family: 'Orbitron'; font-size: 30px; font-weight: 900; pointer-events: none; animation: popUp 0.8s ease-out forwards; text-shadow: 0 0 10px #000; }
+        @keyframes popUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-150px); } }
 
-        /* Upgrades & Cards */
-        .card { background: var(--card); border: 1px solid #222; border-radius: 20px; width: 100%; padding: 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .up-title { font-weight: bold; font-size: 16px; margin-bottom: 4px; }
-        .up-cost { color: var(--gold); font-size: 12px; font-weight: 900; }
-        .btn-action { background: var(--gold); color: #000; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 900; cursor: pointer; }
+        /* التطويرات */
+        .card { background: #111; border: 1px solid #222; border-radius: 20px; width: 100%; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .up-info b { display: block; font-size: 16px; }
+        .up-info span { font-size: 12px; color: var(--gold); font-weight: bold; }
+        .up-btn { background: var(--gold); color: #000; border: none; padding: 10px 18px; border-radius: 12px; font-weight: 900; }
 
-        /* Navigation Bar */
-        .dock { position: fixed; bottom: 20px; left: 15px; right: 15px; background: rgba(10,10,10,0.95); backdrop-filter: blur(15px); border-radius: 30px; display: flex; justify-content: space-around; padding: 15px; border: 1px solid #333; }
-        .dock-item { color: #444; text-align: center; font-size: 10px; font-weight: bold; transition: 0.3s; }
-        .dock-item.active-tab { color: var(--gold); transform: translateY(-5px); }
-        .dock-item svg { width: 24px; height: 24px; display: block; margin: 0 auto 5px; fill: currentColor; }
+        /* الطاقة */
+        .energy-box { width: 100%; margin-top: auto; margin-bottom: 85px; text-align: left; }
+        .energy-bar-bg { height: 12px; background: #111; border-radius: 10px; border: 1px solid #333; overflow: hidden; }
+        .energy-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #fff); width: 100%; transition: 0.2s; }
+
+        /* المنيو */
+        .nav { position: fixed; bottom: 15px; left: 15px; right: 15px; background: rgba(15,15,15,0.95); backdrop-filter: blur(10px); border-radius: 25px; display: flex; justify-content: space-around; padding: 15px; border: 1px solid #333; }
+        .nav-item { color: #555; font-size: 11px; font-weight: bold; cursor: pointer; text-align: center; }
+        .nav-item.active { color: var(--gold); }
+        .nav-item svg { width: 24px; height: 24px; display: block; margin: 0 auto 5px; fill: currentColor; }
     </style>
 </head>
 <body>
 
 <div class="app">
-    <div class="u-header">
-        <div class="u-profile">
-            <img id="u-img" class="u-avatar" src="">
-            <div>
-                <div id="u-name" style="font-size: 14px; font-weight: 900;">User</div>
-                <div class="u-rank">ELITE MEMBER</div>
-            </div>
-        </div>
-        <div id="ton-connect"></div>
+    <div class="level-header">
+        <div class="rank-name" id="rank-text">Bronze Miner</div>
+        <div class="xp-container"><div class="xp-bar" id="xp-fill"></div></div>
+        <div style="font-size: 10px; margin-top: 5px; color: #888;">Level <span id="lvl-num">1</span>/10</div>
     </div>
 
     <div id="home" class="screen active">
-        <div class="score-display">
-            <div class="score-label">BALANCE</div>
-            <div class="score-val" id="bal">0</div>
-            <div class="profit-info">Tap Profit: +<span id="p-tap">1</span> Gold</div>
+        <div class="balance-box">
+            <div class="balance-val"><div class="coin-mini"></div><span id="bal">0</span></div>
         </div>
-        <div class="coin-container" id="tap-zone">
-            <div class="coin-btn"><div class="coin-inner">G</div></div>
+        <div class="coin-wrap" id="tap-area">
+            <div class="main-coin"></div>
         </div>
-        <div style="width: 100%; margin-top: auto; margin-bottom: 90px;">
+        <div class="energy-box">
             <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:8px; font-weight:bold;">
-                <span>⚡ Energy</span><span id="nrg-txt">1000/1000</span>
+                <span>⚡ Energy</span><span id="nrg-text">1000/1000</span>
             </div>
-            <div style="height:12px; background:#111; border-radius:10px; border:1px solid #333; overflow:hidden;">
-                <div id="nrg-bar" style="height:100%; width:100%; background:linear-gradient(90deg, #FFD700, #fff); transition:0.3s;"></div>
-            </div>
+            <div class="energy-bar-bg"><div class="energy-fill" id="nrg-fill"></div></div>
         </div>
     </div>
 
-    <div id="shop" class="screen">
-        <h2 style="color:var(--gold); margin-bottom:20px;">Mining Power</h2>
+    <div id="boost" class="screen">
+        <h2 style="color:var(--gold)">Upgrades</h2>
         <div class="card">
-            <div>
-                <div class="up-title">Multi-Tap</div>
-                <div class="up-cost">Cost: <span id="mt-cost">500</span> 🪙</div>
-            </div>
-            <button class="btn-action" onclick="buyUpgrade('mt')">Upgrade</button>
+            <div class="up-info"><b>Multi-Tap</b><span id="mt-cost">500</span> 🪙</div>
+            <button class="up-btn" onclick="buyMT()">Upgrade</button>
         </div>
         <div class="card">
-            <div>
-                <div class="up-title">Energy Limit</div>
-                <div class="up-cost">Cost: <span id="el-cost">1000</span> 🪙</div>
-            </div>
-            <button class="btn-action" onclick="buyUpgrade('el')">Upgrade</button>
+            <div class="up-info"><b>Energy Limit</b><span id="el-cost">1000</span> 🪙</div>
+            <button class="up-btn" onclick="buyEL()">Upgrade</button>
         </div>
     </div>
 
-    <nav class="dock">
-        <div class="dock-item active-tab" onclick="tab('home', this)"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home</div>
-        <div class="dock-item" onclick="tab('shop', this)"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>Upgrades</div>
+    <nav class="nav">
+        <div class="nav-item active" onclick="showTab('home', this)"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home</div>
+        <div class="nav-item" onclick="showTab('boost', this)"><svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>Boost</div>
     </nav>
 </div>
 
 <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
-    document.getElementById('u-name').innerText = tg.initDataUnsafe.user?.first_name || "Mugahed";
-    document.getElementById('u-img').src = tg.initDataUnsafe.user?.photo_url || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+    const levels = [
+        { name: "Bronze Miner", min: 0 },
+        { name: "Silver Digger", min: 5000 },
+        { name: "Gold Hunter", min: 25000 },
+        { name: "Diamond Boss", min: 100000 },
+        { name: "Crypto King", min: 500000 },
+        { name: "Legendary", min: 1000000 }
+    ];
 
-    // TON Wallet الربط المباشر
-    const tonUI = new TON_CONNECT_UI.TonConnectUI({
-        manifestUrl: 'https://raw.githubusercontent.com/ton-community/tutorials/main/03-client/test/public/tonconnect-manifest.json',
-        buttonRootId: 'ton-connect'
-    });
+    let bal = parseInt(localStorage.getItem('bal')) || 0;
+    let nrg = parseInt(localStorage.getItem('nrg')) || 1000;
+    let tapPower = parseInt(localStorage.getItem('tap')) || 1;
+    let nrgMax = parseInt(localStorage.getItem('nrgMax')) || 1000;
 
-    // Game Logic
-    let bal = parseInt(localStorage.getItem('g_bal')) || 0;
-    let nrg = parseInt(localStorage.getItem('g_nrg')) || 1000;
-    let tapPower = parseInt(localStorage.getItem('g_tap')) || 1;
-    let mtCost = 500;
-
-    function sync() {
+    function update() {
         document.getElementById('bal').innerText = bal.toLocaleString();
-        document.getElementById('p-tap').innerText = tapPower;
-        document.getElementById('nrg-txt').innerText = `${nrg}/1000`;
-        document.getElementById('nrg-bar').style.width = (nrg/10)+'%';
-        localStorage.setItem('g_bal', bal);
-        localStorage.setItem('g_nrg', nrg);
-        localStorage.setItem('g_tap', tapPower);
+        document.getElementById('nrg-text').innerText = `${nrg}/${nrgMax}`;
+        document.getElementById('nrg-fill').style.width = (nrg / nrgMax * 100) + '%';
+        
+        // حساب المستوى
+        let currentLvl = 0;
+        for (let i = 0; i < levels.length; i++) {
+            if (bal >= levels[i].min) currentLvl = i;
+        }
+        document.getElementById('rank-text').innerText = levels[currentLvl].name;
+        document.getElementById('lvl-num').innerText = currentLvl + 1;
+        
+        let nextLvlMin = levels[currentLvl + 1] ? levels[currentLvl + 1].min : levels[currentLvl].min;
+        let progress = (bal / nextLvlMin) * 100;
+        document.getElementById('xp-fill').style.width = Math.min(progress, 100) + '%';
+
+        localStorage.setItem('bal', bal);
+        localStorage.setItem('nrg', nrg);
+        localStorage.setItem('tap', tapPower);
+        localStorage.setItem('nrgMax', nrgMax);
     }
 
-    document.getElementById('tap-zone').addEventListener('touchstart', (e) => {
+    document.getElementById('tap-area').addEventListener('touchstart', (e) => {
         e.preventDefault();
         if(nrg >= tapPower) {
-            bal += tapPower; nrg -= tapPower; sync();
-            createFloat(e.touches[0].clientX, e.touches[0].clientY);
+            bal += tapPower; nrg -= tapPower; update();
+            createPop(e.touches[0].clientX, e.touches[0].clientY);
             if(navigator.vibrate) navigator.vibrate(10);
         }
     });
 
-    function createFloat(x, y) {
-        const n = document.createElement('div');
-        n.className = 'floating-num'; n.innerText = `+${tapPower}`;
-        n.style.left = x + 'px'; n.style.top = y + 'px';
-        document.body.appendChild(n);
-        setTimeout(() => n.remove(), 700);
+    function createPop(x, y) {
+        const p = document.createElement('div');
+        p.className = 'pop'; p.innerText = `+${tapPower}`;
+        p.style.left = x + 'px'; p.style.top = y + 'px';
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 800);
     }
 
-    function buyUpgrade(type) {
-        if(type === 'mt' && bal >= mtCost) {
-            bal -= mtCost; tapPower++; mtCost *= 2;
-            document.getElementById('mt-cost').innerText = mtCost;
-            sync(); alert("Upgrade Successful! 🚀");
-        }
+    function buyMT() {
+        let cost = tapPower * 1000;
+        if(bal >= cost) {
+            bal -= cost; tapPower++; update();
+            alert("Success! Your power is now " + tapPower);
+        } else { alert("Not enough gold!"); }
     }
 
-    function tab(id, el) {
+    function buyEL() {
+        let cost = nrgMax;
+        if(bal >= cost) {
+            bal -= cost; nrgMax += 500; nrg = nrgMax; update();
+            alert("Energy limit increased!");
+        } else { alert("Not enough gold!"); }
+    }
+
+    function showTab(id, el) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.dock-item').forEach(i => i.classList.remove('active-tab'));
-        document.getElementById(id).classList.add('active'); el.classList.add('active-tab');
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        document.getElementById(id).classList.add('active'); el.classList.add('active');
     }
 
-    setInterval(() => { if(nrg < 1000) { nrg++; sync(); } }, 2000);
-    sync();
+    setInterval(() => { if(nrg < nrgMax) { nrg += 2; update(); } }, 1000);
+    update();
 </script>
 </body>
 </html>
