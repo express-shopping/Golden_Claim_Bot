@@ -3,166 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Golden Claim | Pro Edition</title>
+    <title>Golden Claim | Hamster Style</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #f5bb5f; --bg: #000000; --card: #1c1f24; --text: #ffffff; }
-        body { margin: 0; background-color: var(--bg); color: var(--text); font-family: 'Roboto', sans-serif; overflow: hidden; height: 100vh; }
-        .app { display: flex; flex-direction: column; height: 100vh; padding: 15px; background: radial-gradient(circle at top, #2c2f35 0%, #000 100%); }
+        :root { --gold: #f3ba2f; --bg: #000000; --card-bg: #1c1f24; --glass: rgba(255, 255, 255, 0.05); }
+        body { margin: 0; background-color: var(--bg); color: white; font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh; }
+        .container { display: flex; flex-direction: column; height: 100vh; padding: 15px; background: radial-gradient(circle at top, #2b2e35 0%, #000 100%); }
 
-        /* الجزء العلوي: المستويات والإحصائيات */
-        .header-stats { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 15px; }
-        .user-info { display: flex; align-items: center; gap: 10px; }
-        #u-pic { width: 35px; height: 35px; border-radius: 8px; border: 1.5px solid var(--primary); }
-        .level-badge { font-size: 10px; background: var(--primary); color: #000; padding: 2px 8px; border-radius: 5px; font-weight: bold; }
+        /* الهيدر العلوي - فخامة الهامستر */
+        .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .exchange-selector { background: var(--card-bg); padding: 8px 15px; border-radius: 12px; display: flex; align-items: center; gap: 8px; border: 1px solid #333; font-size: 12px; }
+        .settings-btn { background: var(--card-bg); padding: 8px; border-radius: 10px; border: 1px solid #333; }
 
-        /* نظام المستويات */
-        .level-section { width: 100%; margin-bottom: 20px; }
-        .level-info { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; color: #aaa; }
-        .progress-container { width: 100%; height: 8px; background: #333; border-radius: 10px; overflow: hidden; }
-        .progress-bar { height: 100%; background: linear-gradient(90deg, #f5bb5f, #ff9900); width: 0%; transition: 0.5s; }
+        /* نظام المستويات - شريط احترافي */
+        .rank-container { margin-bottom: 20px; }
+        .rank-header { display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; margin-bottom: 6px; color: #888; }
+        .rank-bar-bg { height: 8px; background: #222; border-radius: 10px; border: 1px solid #333; overflow: hidden; }
+        .rank-bar-fill { height: 100%; background: linear-gradient(90deg, #f3ba2f, #ff9900); width: 0%; transition: 0.5s; box-shadow: 0 0 10px var(--gold); }
 
-        /* المكافآت اليومية (مثل الهامستر) */
-        .daily-rewards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; }
-        .reward-card { background: var(--card); border: 1px solid #333; border-radius: 12px; padding: 10px; text-align: center; font-size: 10px; position: relative; }
-        .reward-card img { width: 25px; margin-bottom: 5px; }
-        .reward-card.active { border-color: var(--primary); box-shadow: 0 0 10px rgba(245,187,95,0.2); }
+        /* الكروت الثلاثية الشهيرة */
+        .daily-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; }
+        .daily-item { background: var(--glass); border: 1px solid #333; border-radius: 12px; padding: 10px; text-align: center; font-size: 9px; backdrop-filter: blur(10px); }
+        .daily-item span { display: block; color: var(--gold); font-weight: 900; margin-bottom: 4px; }
 
-        /* الرصيد والعملة */
-        .main-score { text-align: center; margin-bottom: 20px; }
-        .score-val { font-size: 42px; font-weight: 900; letter-spacing: 1px; }
-        .coin-btn {
-            width: 260px; height: 260px; margin: 0 auto; border-radius: 50%;
-            background: radial-gradient(circle, #f5bb5f 0%, #7d5a22 100%);
-            border: 12px solid #282b30; box-shadow: 0 15px 30px rgba(0,0,0,0.5);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: transform 0.05s; position: relative;
+        .screen { display: none; flex-direction: column; align-items: center; flex-grow: 1; }
+        .active { display: flex; }
+
+        /* العملة الكبيرة وتأثير النقر */
+        .score-val { font-size: 48px; font-weight: 900; margin: 10px 0; display: flex; align-items: center; gap: 10px; }
+        .coin-trigger {
+            width: 280px; height: 280px; border-radius: 50%;
+            background: radial-gradient(circle, #f3ba2f 10%, #8a6d1f 100%);
+            border: 15px solid #25282e; box-shadow: 0 0 50px rgba(243,186,47,0.15);
+            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.05s;
         }
-        .coin-btn:active { transform: scale(0.95); }
-        .coin-btn span { font-size: 120px; font-weight: 900; color: rgba(0,0,0,0.15); }
+        .coin-trigger:active { transform: scale(0.94); }
 
-        /* الأرقام الطائرة البيضاء */
-        .tap-number { position: absolute; color: white; font-size: 30px; font-weight: 900; pointer-events: none; animation: flyUp 0.8s forwards; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
-        @keyframes flyUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-120px); } }
+        /* قسم التطوير (Mining) */
+        .upgrade-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; padding-bottom: 100px; overflow-y: auto; }
+        .up-card { background: var(--card-bg); border-radius: 16px; padding: 15px; border: 1px solid #333; }
+        .up-name { font-weight: bold; font-size: 13px; margin-bottom: 5px; display: block; }
+        .up-profit { color: #888; font-size: 10px; margin-bottom: 10px; display: block; }
+        .up-price { background: #222; padding: 5px; border-radius: 8px; text-align: center; font-size: 11px; font-weight: bold; color: var(--gold); }
 
-        /* شريط التنقل السفلي الاحترافي */
-        .navbar { position: fixed; bottom: 0; left: 0; right: 0; background: #111; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #222; }
-        .nav-item { text-align: center; font-size: 10px; color: #666; cursor: pointer; }
-        .nav-item.active { color: var(--primary); }
-        .nav-item svg { width: 22px; height: 22px; display: block; margin: 0 auto 4px; fill: currentColor; }
+        /* شريط التنقل السفلي */
+        .bottom-menu { position: fixed; bottom: 10px; left: 10px; right: 10px; background: #1c1f24; border-radius: 20px; display: flex; justify-content: space-around; padding: 12px; border: 1px solid #333; }
+        .menu-btn { color: #555; text-align: center; font-size: 10px; font-weight: bold; }
+        .menu-btn.active { color: white; }
+        .menu-btn svg { width: 22px; height: 22px; display: block; margin: 0 auto 4px; fill: currentColor; }
     </style>
 </head>
 <body>
 
-<div class="app">
-    <div class="header-stats">
-        <div class="user-info">
-            <img id="u-pic" src="https://via.placeholder.com/35" alt="">
-            <div>
-                <div id="u-name" style="font-size: 12px; font-weight: bold;">Player</div>
-                <div class="level-badge" id="rank-name">Bronze</div>
+<div class="container">
+    <div class="top-nav">
+        <div class="exchange-selector">
+            <div style="width:20px; height:20px; background:var(--gold); border-radius:50%;"></div>
+            <b>Binance</b>
+        </div>
+        <div class="settings-btn">⚙️</div>
+    </div>
+
+    <div class="rank-container">
+        <div class="rank-header">
+            <span>Legendary ></span>
+            <span>Level <b>9/11</b></span>
+        </div>
+        <div class="rank-bar-bg"><div class="rank-bar-fill" id="xp-bar"></div></div>
+    </div>
+
+    <div class="daily-grid">
+        <div class="daily-item"><span>Daily reward</span> 04:32:11</div>
+        <div class="daily-item"><span>Daily cipher</span> 11:20:05</div>
+        <div class="daily-item"><span>Daily combo</span> 17:45:30</div>
+    </div>
+
+    <div id="home" class="screen active">
+        <div class="score-val" id="score">0</div>
+        <div class="coin-trigger" id="tap-btn">
+            <div style="font-size:120px; font-weight:900; color:rgba(0,0,0,0.2);">H</div>
+        </div>
+    </div>
+
+    <div id="mine" class="screen">
+        <h3 style="margin-bottom:15px; width:100%;">Mining Market</h3>
+        <div class="upgrade-grid">
+            <div class="up-card" onclick="upgrade('Fan Tokens')">
+                <span class="up-name">Fan Tokens</span>
+                <span class="up-profit">Profit per hour: +500</span>
+                <div class="up-price">Cost: 10,000</div>
+            </div>
+            <div class="up-card" onclick="upgrade('Staking')">
+                <span class="up-name">Staking</span>
+                <span class="up-profit">Profit per hour: +1.2K</span>
+                <div class="up-price">Cost: 25,000</div>
             </div>
         </div>
-        <div id="ton-connect"></div>
     </div>
 
-    <div class="level-section">
-        <div class="level-info">
-            <span>Level <b id="lvl-num">1</b>/10</span>
-            <span id="xp-text">0 / 5000</span>
-        </div>
-        <div class="progress-container"><div class="progress-bar" id="progress-fill"></div></div>
-    </div>
-
-    <div class="daily-rewards">
-        <div class="reward-card active">
-            <div style="color:var(--primary); font-weight:bold;">Daily Reward</div>
-            <div style="font-size:9px; margin-top:4px;">07:22</div>
-        </div>
-        <div class="reward-card">
-            <div style="color:#aaa;">Daily Cipher</div>
-            <div style="font-size:9px; margin-top:4px;">12:45</div>
-        </div>
-        <div class="reward-card">
-            <div style="color:#aaa;">Daily Combo</div>
-            <div style="font-size:9px; margin-top:4px;">18:10</div>
-        </div>
-    </div>
-
-    <div class="main-score">
-        <div class="score-val" id="score">0</div>
-        <div style="font-size: 11px; color: var(--primary); margin-top: 5px; font-weight: bold;">TAP TO EARN</div>
-    </div>
-
-    <div class="coin-btn" id="coin"><span>G</span></div>
-
-    <div style="margin-top: auto; margin-bottom: 80px;">
-        <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;">
-            <span id="energy-txt">1000/1000</span><span>⚡ Energy</span>
-        </div>
-        <div class="progress-container" style="height:6px;"><div class="progress-bar" id="energy-fill" style="width:100%;"></div></div>
-    </div>
-
-    <nav class="navbar">
-        <div class="nav-item active"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Exchange</div>
-        <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>Mine</div>
-        <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>Friends</div>
-        <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8z"/></svg>Airdrop</div>
+    <nav class="bottom-menu">
+        <div class="menu-btn active" onclick="tab('home', this)"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Exchange</div>
+        <div class="menu-btn" onclick="tab('mine', this)"><svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>Mine</div>
+        <div class="menu-btn"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>Friends</div>
+        <div class="menu-btn"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>Earn</div>
     </nav>
 </div>
 
 <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
-
-    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-        manifestUrl: 'https://raw.githubusercontent.com/ton-community/tutorials/main/03-client/test/public/tonconnect-manifest.json',
-        buttonRootId: 'ton-connect'
-    });
-
-    let score = parseInt(localStorage.getItem('sc')) || 0;
-    let nrg = parseInt(localStorage.getItem('en')) || 1000;
-    const ranks = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Epic", "Legendary"];
-
-    function update() {
-        document.getElementById('score').innerText = score.toLocaleString();
-        document.getElementById('u-name').innerText = tg.initDataUnsafe.user?.first_name || "Mugahed";
-        document.getElementById('u-pic').src = tg.initDataUnsafe.user?.photo_url || "https://via.placeholder.com/35";
-        
-        // Level Logic
-        let lvlIndex = Math.floor(score / 5000);
-        let currentRank = ranks[lvlIndex] || "Legendary";
-        document.getElementById('rank-name').innerText = currentRank;
-        document.getElementById('lvl-num').innerText = lvlIndex + 1;
-        
-        let progress = (score % 5000) / 5000 * 100;
-        document.getElementById('progress-fill').style.width = progress + "%";
-        document.getElementById('xp-text').innerText = `${score % 5000} / 5000`;
-
-        document.getElementById('energy-txt').innerText = nrg + "/1000";
-        document.getElementById('energy-fill').style.width = (nrg/10) + "%";
-
-        localStorage.setItem('sc', score); localStorage.setItem('en', nrg);
+    let bal = parseInt(localStorage.getItem('h_bal')) || 0;
+    
+    function refresh() {
+        document.getElementById('score').innerText = bal.toLocaleString();
+        let prog = (bal % 100000) / 1000;
+        document.getElementById('xp-bar').style.width = prog + "%";
+        localStorage.setItem('h_bal', bal);
     }
 
-    document.getElementById('coin').addEventListener('touchstart', (e) => {
+    document.getElementById('tap-btn').addEventListener('touchstart', (e) => {
         e.preventDefault();
-        if(nrg > 0) {
-            score += 1; nrg -= 1; update();
-            const num = document.createElement('div');
-            num.className = 'tap-number'; num.innerText = '+1';
-            num.style.left = e.touches[0].clientX + 'px';
-            num.style.top = e.touches[0].clientY + 'px';
-            document.body.appendChild(num);
-            setTimeout(() => num.remove(), 800);
-            if(navigator.vibrate) navigator.vibrate(10);
-        }
+        bal += 1; refresh();
+        if(navigator.vibrate) navigator.vibrate(5);
     });
 
-    setInterval(() => { if(nrg < 1000) { nrg += 1; update(); } }, 1500);
-    update();
+    function tab(id, el) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active'); el.classList.add('active');
+    }
+
+    function upgrade(name) { alert("You unlocked: " + name + "! Your profit will increase."); }
+    refresh();
 </script>
 </body>
 </html>
