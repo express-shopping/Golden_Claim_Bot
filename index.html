@@ -1,189 +1,584 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Golden Claim | Evolution</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        :root { --gold: #FFD700; --silver: #C0C0C0; --bronze: #CD7F32; --bg: #000; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Montserrat', sans-serif; height: 100vh; overflow: hidden; }
-        
-        .app { height: 100vh; display: flex; flex-direction: column; padding: 20px; background: radial-gradient(circle at 50% 0%, #1a1a1a 0%, #000 100%); }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Golden Claim | Evolution</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --gold: #FFD700;
+  --silver: #C0C0C0;
+  --bronze: #CD7F32;
+  --bg: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  --light-bg: #1a1a1a;
+  --accent: #ffcc00;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: #fff;
+  font-family: 'Montserrat', sans-serif;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-conic-gradient(
+    #222 0deg, #222 10deg, #333 10deg, #333 20deg
+  );
+  background-size: 1000px 1000px;
+  opacity: 0.05;
+  animation: rotateBg 60s linear infinite;
+  z-index: -1;
+}
+@keyframes rotateBg {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.app {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
 
-        /* المستويات والألقاب */
-        .level-header { display: flex; flex-direction: column; align-items: center; margin-bottom: 10px; }
-        .rank-name { color: var(--gold); font-weight: 900; font-size: 18px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; }
-        .xp-container { width: 60%; height: 6px; background: #222; border-radius: 10px; overflow: hidden; border: 1px solid #333; }
-        .xp-bar { height: 100%; background: linear-gradient(90deg, #fff, var(--gold)); width: 0%; transition: 0.5s; }
+/* العنوان والمستوى */
+.level-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 15px;
+  text-shadow: 0 0 10px rgba(0,0,0,0.7);
+}
+.rank-name {
+  color: var(--gold);
+  font-weight: 900;
+  font-size: 24px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+#lvl-num {
+  font-size: 18px;
+  margin-top: 4px;
+  color: #ccc;
+}
+.xp-container {
+  width: 70%;
+  height: 8px;
+  background: #222;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #444;
+  margin-top: 8px;
+}
+.xp-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #ffd700, #ff8c00);
+  width: 0%;
+  transition: width 0.5s ease;
+}
 
-        .screen { display: none; flex-direction: column; align-items: center; flex-grow: 1; animation: fadeIn 0.3s; }
-        .active { display: flex; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+/* الرصيد */
+.balance-box {
+  text-align: center;
+  margin: 20px 0;
+}
+.balance-val {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 52px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #ffd700;
+  text-shadow: 0 0 8px #000;
+}
+.coin-mini {
+  width: 50px;
+  height: 50px;
+  background: var(--gold);
+  border-radius: 50%;
+  box-shadow: 0 0 15px var(--gold);
+}
+/* الأرقام الطائرة */
+@keyframes floatUp {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-150px); }
+}
+.pop {
+  position: absolute;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 28px;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 0 8px #000;
+  animation: floatUp 0.8s forwards;
+  pointer-events: none;
+}
 
-        /* رصيد الذهب */
-        .balance-box { text-align: center; margin: 15px 0; }
-        .balance-val { font-family: 'Orbitron', sans-serif; font-size: 48px; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 10px; }
-        .coin-mini { width: 40px; height: 40px; background: var(--gold); border-radius: 50%; display: inline-block; box-shadow: 0 0 10px var(--gold); }
+/* العملة الكبيرة */
+.coin-wrap {
+  position: relative;
+  margin: 30px 0;
+  display: flex;
+  justify-content: center;
+}
+.main-coin {
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffe552 0%, #b8860b 70%);
+  border: 12px solid rgba(255,255,255,0.2);
+  box-shadow: 0 0 50px rgba(255,215,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+.main-coin:hover {
+  transform: scale(1.05);
+}
+.main-coin::after {
+  content: "G";
+  font-family: 'Orbitron', sans-serif;
+  font-size: 130px;
+  color: rgba(0,0,0,0.1);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
 
-        /* العملة الكبيرة */
-        .coin-wrap { position: relative; margin: 30px 0; }
-        .main-coin {
-            width: 270px; height: 270px; border-radius: 50%;
-            background: radial-gradient(circle, #FFE552 0%, #BA8B02 70%);
-            border: 10px solid #1a1a1a; box-shadow: 0 0 40px rgba(255,215,0,0.2);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: transform 0.05s;
-        }
-        .main-coin:active { transform: scale(0.92); }
-        .main-coin::after { content: "G"; font-family: 'Orbitron'; font-size: 120px; color: rgba(0,0,0,0.1); }
+/* الأرقام الطائرة */
+@keyframes popUp {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-150px); }
+}
+.pop {
+  position: absolute;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 30px;
+  font-weight: 900;
+  pointer-events: none;
+  text-shadow: 0 0 8px #000;
+  animation: floatUp 0.8s ease-out forwards;
+}
 
-        /* الأرقام الطائرة */
-        .pop { position: absolute; color: #fff; font-family: 'Orbitron'; font-size: 30px; font-weight: 900; pointer-events: none; animation: popUp 0.8s ease-out forwards; text-shadow: 0 0 10px #000; }
-        @keyframes popUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-150px); } }
+/* بطاقات الترقية */
+.cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+}
+.card {
+  background: #222;
+  border-radius: 15px;
+  padding: 15px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 20px rgba(255,215,0,0.7);
+}
+.up-info {
+  display: flex;
+  flex-direction: column;
+}
+.up-info b {
+  font-size: 16px;
+}
+.up-btn {
+  background: var(--gold);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+  transition: background 0.3s, transform 0.2s;
+}
+.up-btn:hover {
+  background: #ffcc00;
+  transform: scale(1.05);
+}
 
-        /* التطويرات */
-        .card { background: #111; border: 1px solid #222; border-radius: 20px; width: 100%; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .up-info b { display: block; font-size: 16px; }
-        .up-info span { font-size: 12px; color: var(--gold); font-weight: bold; }
-        .up-btn { background: var(--gold); color: #000; border: none; padding: 10px 18px; border-radius: 12px; font-weight: 900; }
+/* الطاقة */
+.energy-box {
+  width: 100%;
+  margin-top: auto;
+  padding: 15px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+}
+.energy-bar-bg {
+  height: 14px;
+  background: #222;
+  border-radius: 10px;
+  border: 1px solid #444;
+  overflow: hidden;
+}
+.energy-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), #fff);
+  width: 100%;
+  transition: width 0.2s;
+}
 
-        /* الطاقة */
-        .energy-box { width: 100%; margin-top: auto; margin-bottom: 85px; text-align: left; }
-        .energy-bar-bg { height: 12px; background: #111; border-radius: 10px; border: 1px solid #333; overflow: hidden; }
-        .energy-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #fff); width: 100%; transition: 0.2s; }
+/* Navigation */
+.nav {
+  position: fixed;
+  bottom: 15px;
+  left: 15px;
+  right: 15px;
+  background: rgba(15,15,15,0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 25px;
+  display: flex;
+  justify-content: space-around;
+  padding: 15px;
+  border: 1px solid #333;
+  z-index: 10;
+}
+.nav-item {
+  color: #555;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: color 0.3s, transform 0.2s;
+}
+.nav-item svg {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 4px;
+}
+.nav-item.active {
+  color: var(--gold);
+}
+.nav-item:hover {
+  transform: scale(1.05);
+  color: var(--gold);
+}
 
-        /* المنيو */
-        .nav { position: fixed; bottom: 15px; left: 15px; right: 15px; background: rgba(15,15,15,0.95); backdrop-filter: blur(10px); border-radius: 25px; display: flex; justify-content: space-around; padding: 15px; border: 1px solid #333; }
-        .nav-item { color: #555; font-size: 11px; font-weight: bold; cursor: pointer; text-align: center; }
-        .nav-item.active { color: var(--gold); }
-        .nav-item svg { width: 24px; height: 24px; display: block; margin: 0 auto 5px; fill: currentColor; }
-    </style>
+/* شاشة الإنجازات والشهادات */
+#achievements {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px;
+  overflow-y: auto;
+  z-index: 20;
+  animation: fadeIn 0.3s;
+}
+#achievements.active {
+  display: flex;
+}
+#achievements h2 {
+  margin-bottom: 20px;
+  color: var(--gold);
+  font-size: 24px;
+}
+.achievement {
+  background: #333;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 15px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transition: transform 0.2s;
+}
+.achievement:hover {
+  transform: translateY(-3px);
+}
+.achievement-icon {
+  width: 50px;
+  height: 50px;
+  background: var(--gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: #000;
+}
+.achievement-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.achievement-info span {
+  font-size: 14px;
+}
+
+/* زر إغلاق شاشة الإنجازات */
+#achievements .close-btn {
+  position: absolute;
+  top: 20px; right: 20px;
+  background: transparent;
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  width: 40px; height: 40px;
+  font-size: 20px;
+  color: var(--gold);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+#achievements .close-btn:hover {
+  background: var(--gold);
+  color: #000;
+  transform: scale(1.1);
+}
+
+/* إخفاء الصفحات الأخرى عند عرض الإنجازات */
+.page-hidden {
+  display: none;
+}
+
+/* أنيميشن */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+</style>
 </head>
 <body>
-
 <div class="app">
-    <div class="level-header">
-        <div class="rank-name" id="rank-text">Bronze Miner</div>
-        <div class="xp-container"><div class="xp-bar" id="xp-fill"></div></div>
-        <div style="font-size: 10px; margin-top: 5px; color: #888;">Level <span id="lvl-num">1</span>/10</div>
+  <!-- مستوى وتقدم -->
+  <div class="level-header">
+    <div class="rank-name" id="rank-text">Bronze Miner</div>
+    <div class="xp-container"><div class="xp-bar" id="xp-fill"></div></div>
+    <div style="font-size:10px; margin-top:4px; color:#888;">Level <span id="lvl-num">1</span>/10</div>
+  </div>
+  
+  <!-- الرصيد -->
+  <div class="balance-box">
+    <div class="balance-val"><div class="coin-mini"></div><span id="bal">0</span></div>
+  </div>
+  
+  <!-- العملة الكبيرة -->
+  <div class="coin-wrap" id="tap-area">
+    <div class="main-coin"></div>
+  </div>
+  
+  <!-- الأرقام الطائرة -->
+  <div id="pop-container" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; overflow:hidden;"></div>
+  
+  <!-- الطاقة -->
+  <div class="energy-box">
+    <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:8px; font-weight:bold;">
+      <span>⚡ Energy</span>
+      <span id="nrg-text">1000/1000</span>
     </div>
-
-    <div id="home" class="screen active">
-        <div class="balance-box">
-            <div class="balance-val"><div class="coin-mini"></div><span id="bal">0</span></div>
-        </div>
-        <div class="coin-wrap" id="tap-area">
-            <div class="main-coin"></div>
-        </div>
-        <div class="energy-box">
-            <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:8px; font-weight:bold;">
-                <span>⚡ Energy</span><span id="nrg-text">1000/1000</span>
-            </div>
-            <div class="energy-bar-bg"><div class="energy-fill" id="nrg-fill"></div></div>
-        </div>
+    <div class="energy-bar-bg"><div class="energy-fill" id="nrg-fill"></div></div>
+  </div>
+  
+  <!-- صفحة التحديثات -->
+  <div id="boost" class="screen" style="display:none; flex-direction:column; align-items:center; padding:10px; overflow:auto;">
+    <h2 style="color:var(--gold); margin-bottom:15px;">Upgrades</h2>
+    <div class="cards-container" id="upgrades-list"></div>
+  </div>
+  
+  <!-- شاشة الإنجازات -->
+  <div id="achievements">
+    <button class="close-btn" onclick="closeAchievements()">×</button>
+    <h2>Achievements & Certificates</h2>
+    <div class="achievement">
+      <div class="achievement-icon">🏆</div>
+      <div class="achievement-info">
+        <span>First Tap</span>
+        <small>Tap your coin for the first time!</small>
+      </div>
     </div>
-
-    <div id="boost" class="screen">
-        <h2 style="color:var(--gold)">Upgrades</h2>
-        <div class="card">
-            <div class="up-info"><b>Multi-Tap</b><span id="mt-cost">500</span> 🪙</div>
-            <button class="up-btn" onclick="buyMT()">Upgrade</button>
-        </div>
-        <div class="card">
-            <div class="up-info"><b>Energy Limit</b><span id="el-cost">1000</span> 🪙</div>
-            <button class="up-btn" onclick="buyEL()">Upgrade</button>
-        </div>
+    <div class="achievement">
+      <div class="achievement-icon">🎖️</div>
+      <div class="achievement-info">
+        <span>Level Up</span>
+        <small>Reach Level 5!</small>
+      </div>
     </div>
-
-    <nav class="nav">
-        <div class="nav-item active" onclick="showTab('home', this)"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home</div>
-        <div class="nav-item" onclick="showTab('boost', this)"><svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>Boost</div>
-    </nav>
+    <div class="achievement">
+      <div class="achievement-icon">💰</div>
+      <div class="achievement-info">
+        <span>Big Spender</span>
+        <small>Earn 1,000,000 gold!</small>
+      </div>
+    </div>
+    <!-- المزيد من الإنجازات يمكن إضافتها هنا -->
+  </div>
+  
+  <!-- Navigation -->
+  <div class="nav">
+    <div class="nav-item active" id="tab-home" onclick="showTab('home', this)">
+      <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home
+    </div>
+    <div class="nav-item" id="tab-upgrade" onclick="showTab('boost', this)">
+      <svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>Upgrades
+    </div>
+    <div class="nav-item" onclick="showAchievements()">
+      <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5 14.5 7.62 14.5 9 13.38 11.5 12 11.5z"/>
+      </svg>Achievements
+    </div>
+  </div>
 </div>
 
 <script>
-    const levels = [
-        { name: "Bronze Miner", min: 0 },
-        { name: "Silver Digger", min: 5000 },
-        { name: "Gold Hunter", min: 25000 },
-        { name: "Diamond Boss", min: 100000 },
-        { name: "Crypto King", min: 500000 },
-        { name: "Legendary", min: 1000000 }
-    ];
+const levels = [
+  { name: "Bronze Miner", min: 0 },
+  { name: "Silver Digger", min: 5000 },
+  { name: "Gold Hunter", min: 25000 },
+  { name: "Diamond Boss", min: 100000 },
+  { name: "Crypto King", min: 500000 },
+  { name: "Legendary", min: 1000000 }
+];
 
-    let bal = parseInt(localStorage.getItem('bal')) || 0;
-    let nrg = parseInt(localStorage.getItem('nrg')) || 1000;
-    let tapPower = parseInt(localStorage.getItem('tap')) || 1;
-    let nrgMax = parseInt(localStorage.getItem('nrgMax')) || 1000;
+let bal = parseInt(localStorage.getItem('bal')) || 0;
+let nrg = parseInt(localStorage.getItem('nrg')) || 1000;
+let tapPower = parseInt(localStorage.getItem('tap')) || 1;
+let nrgMax = parseInt(localStorage.getItem('nrgMax')) || 1000;
 
-    function update() {
-        document.getElementById('bal').innerText = bal.toLocaleString();
-        document.getElementById('nrg-text').innerText = `${nrg}/${nrgMax}`;
-        document.getElementById('nrg-fill').style.width = (nrg / nrgMax * 100) + '%';
-        
-        // حساب المستوى
-        let currentLvl = 0;
-        for (let i = 0; i < levels.length; i++) {
-            if (bal >= levels[i].min) currentLvl = i;
-        }
-        document.getElementById('rank-text').innerText = levels[currentLvl].name;
-        document.getElementById('lvl-num').innerText = currentLvl + 1;
-        
-        let nextLvlMin = levels[currentLvl + 1] ? levels[currentLvl + 1].min : levels[currentLvl].min;
-        let progress = (bal / nextLvlMin) * 100;
-        document.getElementById('xp-fill').style.width = Math.min(progress, 100) + '%';
+const upgrades = [
+  { name: "Multi-Tap", cost: 5000, effect: () => { tapPower++; update(); alert("تم الترقية! القوة الآن:" + tapPower); } },
+  { name: "Energy Limit", cost: 10000, effect: () => { nrgMax += 500; nrg = nrgMax; update(); alert("تم زيادة الحد الأقصى للطاقة"); } },
+];
 
-        localStorage.setItem('bal', bal);
-        localStorage.setItem('nrg', nrg);
-        localStorage.setItem('tap', tapPower);
-        localStorage.setItem('nrgMax', nrgMax);
-    }
+function update() {
+  document.getElementById('bal').innerText = bal.toLocaleString();
+  document.getElementById('nrg-text').innerText = `${nrg}/${nrgMax}`;
+  document.getElementById('nrg-fill').style.width = (nrg / nrgMax * 100) + '%';
 
-    document.getElementById('tap-area').addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        if(nrg >= tapPower) {
-            bal += tapPower; nrg -= tapPower; update();
-            createPop(e.touches[0].clientX, e.touches[0].clientY);
-            if(navigator.vibrate) navigator.vibrate(10);
-        }
-    });
+  // تحديد المستوى
+  let currentLvl = 0;
+  for (let i=0; i<levels.length; i++) {
+    if (bal >= levels[i].min) currentLvl = i;
+  }
+  document.getElementById('rank-text').innerText = levels[currentLvl].name;
+  document.getElementById('lvl-num').innerText = currentLvl + 1;
 
-    function createPop(x, y) {
-        const p = document.createElement('div');
-        p.className = 'pop'; p.innerText = `+${tapPower}`;
-        p.style.left = x + 'px'; p.style.top = y + 'px';
-        document.body.appendChild(p);
-        setTimeout(() => p.remove(), 800);
-    }
+  let nextLvlMin = levels[currentLvl+1] ? levels[currentLvl+1].min : levels[currentLvl].min;
+  let progress = (bal / nextLvlMin) * 100;
+  document.getElementById('xp-fill').style.width = Math.min(progress, 100)+'%';
 
-    function buyMT() {
-        let cost = tapPower * 1000;
-        if(bal >= cost) {
-            bal -= cost; tapPower++; update();
-            alert("Success! Your power is now " + tapPower);
-        } else { alert("Not enough gold!"); }
-    }
+  localStorage.setItem('bal', bal);
+  localStorage.setItem('nrg', nrg);
+  localStorage.setItem('tap', tapPower);
+  localStorage.setItem('nrgMax', nrgMax);
+}
 
-    function buyEL() {
-        let cost = nrgMax;
-        if(bal >= cost) {
-            bal -= cost; nrgMax += 500; nrg = nrgMax; update();
-            alert("Energy limit increased!");
-        } else { alert("Not enough gold!"); }
-    }
+// عند الضغط على العملة
+document.getElementById('tap-area').addEventListener('touchstart', e => {
+  e.preventDefault();
+  if (nrg >= tapPower) {
+    bal += tapPower; nrg -= tapPower; update();
+    createPop(e.touches[0].clientX, e.touches[0].clientY);
+    if (navigator.vibrate) navigator.vibrate(10);
+  }
+});
 
-    function showTab(id, el) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-        document.getElementById(id).classList.add('active'); el.classList.add('active');
-    }
+// إنشاء الأرقام الطائرة
+function createPop(x, y) {
+  const p = document.createElement('div');
+  p.className = 'pop';
+  p.innerText = `+${tapPower}`;
+  p.style.left = x + 'px';
+  p.style.top = y + 'px';
+  document.getElementById('pop-container').appendChild(p);
+  setTimeout(() => p.remove(), 800);
+}
 
-    setInterval(() => { if(nrg < nrgMax) { nrg += 2; update(); } }, 1000);
-    update();
+// ترقية Multi-Tap
+function buyMT() {
+  const cost = 5000;
+  if (bal >= cost) {
+    bal -= cost; tapPower++; update();
+    alert("تم الترقية! القوة الآن: " + tapPower);
+  } else {
+    alert("ليس لديك الذهب الكافي!");
+  }
+}
+
+// ترقية الحد الأقصى للطاقة
+function buyEL() {
+  const cost = nrgMax;
+  if (bal >= cost) {
+    bal -= cost; nrgMax += 500; nrg = nrgMax; update();
+    alert("تم زيادة الحد الأقصى للطاقة");
+  } else {
+    alert("ليس لديك الذهب الكافي!");
+  }
+}
+
+// عرض صفحة التحديثات
+function showTab(id, el) {
+  document.querySelectorAll('.screen').forEach(s => s.style.display='none');
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  document.getElementById(id).style.display='flex';
+  el.classList.add('active');
+}
+
+// عرض شاشة الإنجازات
+function showAchievements() {
+  document.getElementById('achievements').classList.add('active');
+}
+function closeAchievements() {
+  document.getElementById('achievements').classList.remove('active');
+}
+  
+// ملء محتوى الترقية
+function loadUpgrades() {
+  const container = document.getElementById('upgrades-list');
+  container.innerHTML = "";
+  upgrades.forEach((upg, index) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="up-info"><b>${upg.name}</b><span>Cost: ${upg.cost} 🪙</span></div>
+      <button class="up-btn" onclick="upgrade(${index})">Buy</button>
+    `;
+    container.appendChild(card);
+  });
+}
+function upgrade(index) {
+  const upg = upgrades[index];
+  if (bal >= upg.cost) {
+    bal -= upg.cost; upg.effect(); loadUpgrades(); update();
+  } else {
+    alert("ليس لديك الذهب الكافي");
+  }
+}
+
+// تحديث الحالة كل ثانية
+setInterval(() => {
+  if (nrg < nrgMax) { nrg += 2; update(); }
+}, 1000);
+loadUpgrades();
+update();
 </script>
 </body>
-</html>
-
+                                 </html>
